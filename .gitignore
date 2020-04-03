@@ -52,3 +52,4 @@
 # End of https://www.gitignore.io/api/go,linux,visualstudiocode
 
 .idea
+bin
