@@ -31,7 +31,7 @@ func trackFood(productiveClient client.ProductiveClient, days ...time.Time) {
 	for _, day := range days {
 		log.Info("Tracking food for " + datetime.Format(day))
 		service := findFoodService(productiveClient, day)
-		timeEntry := model.NewTimeEntry("", "30", userID, service, day)
+		timeEntry := model.NewTimeEntry("", 30, userID, service, day)
 		productiveClient.CreateFoodTimeEntry(timeEntry)
 	}
 }

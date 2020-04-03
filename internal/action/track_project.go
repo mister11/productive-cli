@@ -1,6 +1,7 @@
 package action
 
 import (
+	"gitlab.com/mister11/productive-cli/internal/utils"
 	"strconv"
 	"strings"
 	"time"
@@ -31,7 +32,7 @@ func TrackProject(productiveClient client.ProductiveClient, trackProjectRequest 
 func trackSavedProject(productiveClient client.ProductiveClient, project config.Project, date time.Time) {
 	config.RemoveExistingProject(project)
 	deal, service := findProjectInfo(productiveClient, project, date)
-	duration := prompt.Input("Time")
+	duration := utils.ParseTime(prompt.Input("Time"))
 	notes := createNotes()
 	timeEntry := model.NewTimeEntry(notes, duration, config.GetUserID(), service, date)
 	productiveClient.CreateTimeEntry(timeEntry)
@@ -42,7 +43,7 @@ func trackNewProject(productiveClient client.ProductiveClient, date time.Time) {
 	selectedDeal := searchNewDeal(productiveClient, date)
 	selectedService := searchNewService(productiveClient, selectedDeal, date)
 
-	duration := prompt.Input("Time")
+	duration := utils.ParseTime(prompt.Input("Time"))
 	notes := createNotes()
 	timeEntry := model.NewTimeEntry(notes, duration, config.GetUserID(), selectedService, date)
 	productiveClient.CreateTimeEntry(timeEntry)

@@ -1,6 +1,7 @@
 package model
 
 import (
+	"strconv"
 	"time"
 
 	"gitlab.com/mister11/productive-cli/internal/datetime"
@@ -31,12 +32,12 @@ type TimeEntry struct {
 	Budget *Service `jsonapi:"relation,service"`
 }
 
-func NewTimeEntry(notes string, duration string, userID string, service *Service, date time.Time) *TimeEntry {
+func NewTimeEntry(notes string, duration int, userID string, service *Service, date time.Time) *TimeEntry {
 	return &TimeEntry{
 		ID:     "0",
 		Date:   datetime.Format(date),
 		Note:   notes,
-		Time:   duration,
+		Time:   strconv.Itoa(duration),
 		User:   &Person{ID: userID},
 		Budget: service,
 	}

@@ -32,14 +32,3 @@ func Input(message string) string {
 	}
 	return result
 }
-
-func Confirm(label string) bool {
-	prompt := promptui.Prompt{
-		Label:     label,
-		IsConfirm: true,
-	}
-
-	_, err := prompt.Run()
-
-	return err == nil
-}
