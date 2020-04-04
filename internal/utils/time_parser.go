@@ -13,14 +13,16 @@ var timeRegex = regexp.MustCompile("^(?:(\\d+)[:])?(\\d+)$"				)
 // needed for API which accepts minutes
 func ParseTime(time string) int {
 	matches := timeRegex.FindStringSubmatch(time)
-	if len(matches) == 3 {
-		return getHours(matches[1])*60 + getMinutes(matches[2])
+	if len(matches) != 3 {
+		log.Error("Wrong time format. You can enter either only minutes or HH:mm format")
+		panic(errors.New("wrong time format"))
 	}
-	if len(matches) == 2 {
-		return getMinutes(matches[1])
+	hoursString := matches[1]
+	minutesString := matches[2]
+	if len(hoursString) == 0 {
+		return getMinutes(minutesString)
 	}
-	log.Error("Wrong time format. You can enter either only minutes or HH:mm format")
-	panic(errors.New("wrong time format"))
+	return getHours(hoursString)*60 + getMinutes(minutesString)
 }
 
 func getHours(hoursString string) int {
