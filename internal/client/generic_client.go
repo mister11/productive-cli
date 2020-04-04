@@ -4,7 +4,7 @@ import (
 	"io"
 	"net/http"
 
-	"gitlab.com/mister11/productive-cli/internal/utils"
+	"github.com/mister11/productive-cli/internal/utils"
 )
 
 type GenericClient struct {

@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"gitlab.com/mister11/productive-cli/internal/app"
+	"github.com/mister11/productive-cli/internal/app"
 )
 
 func main() {

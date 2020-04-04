@@ -6,7 +6,7 @@ import (
 	"reflect"
 
 	"github.com/google/jsonapi"
-	"gitlab.com/mister11/productive-cli/internal/utils"
+	"github.com/mister11/productive-cli/internal/utils"
 )
 
 func ToJsonEmbedded(model interface{}) []byte {

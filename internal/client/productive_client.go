@@ -3,15 +3,15 @@ package client
 import (
 	"bytes"
 	"fmt"
-	"gitlab.com/mister11/productive-cli/internal/client/model"
+	"github.com/mister11/productive-cli/internal/client/model"
 	"net/url"
 	"reflect"
 	"time"
 
-	"gitlab.com/mister11/productive-cli/internal/config"
-	"gitlab.com/mister11/productive-cli/internal/datetime"
-	"gitlab.com/mister11/productive-cli/internal/json"
-	"gitlab.com/mister11/productive-cli/internal/utils"
+	"github.com/mister11/productive-cli/internal/config"
+	"github.com/mister11/productive-cli/internal/datetime"
+	"github.com/mister11/productive-cli/internal/json"
+	"github.com/mister11/productive-cli/internal/utils"
 )
 
 const baseURL = "https://api.productive.io/api/v2/"

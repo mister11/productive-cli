@@ -2,7 +2,7 @@ package datetime
 
 import (
 	"github.com/jinzhu/now"
-	"gitlab.com/mister11/productive-cli/internal/utils"
+	"github.com/mister11/productive-cli/internal/utils"
 	"time"
 )
 

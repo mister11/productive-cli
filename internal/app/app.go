@@ -2,8 +2,8 @@ package app
 
 import (
 	"github.com/urfave/cli/v2"
-	"gitlab.com/mister11/productive-cli/internal/action"
-	"gitlab.com/mister11/productive-cli/internal/client"
+	"github.com/mister11/productive-cli/internal/action"
+	"github.com/mister11/productive-cli/internal/client"
 )
 
 func CreateProductiveCliApp() *cli.App {

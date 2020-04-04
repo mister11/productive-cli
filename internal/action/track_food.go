@@ -3,11 +3,11 @@ package action
 import (
 	"time"
 
-	"gitlab.com/mister11/productive-cli/internal/client"
-	"gitlab.com/mister11/productive-cli/internal/client/model"
-	"gitlab.com/mister11/productive-cli/internal/config"
-	"gitlab.com/mister11/productive-cli/internal/datetime"
-	"gitlab.com/mister11/productive-cli/internal/log"
+	"github.com/mister11/productive-cli/internal/client"
+	"github.com/mister11/productive-cli/internal/client/model"
+	"github.com/mister11/productive-cli/internal/config"
+	"github.com/mister11/productive-cli/internal/datetime"
+	"github.com/mister11/productive-cli/internal/log"
 )
 
 func TrackFood(productiveClient client.ProductiveClient, trackFoodRequest TrackFoodRequest) {

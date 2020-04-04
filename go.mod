@@ -1,4 +1,4 @@
-module gitlab.com/mister11/productive-cli
+module github.com/mister11/productive-cli
 
 go 1.14
 

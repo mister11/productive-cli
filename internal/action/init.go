@@ -1,12 +1,12 @@
 package action
 
 import (
-	"gitlab.com/mister11/productive-cli/internal/utils"
+	"github.com/mister11/productive-cli/internal/utils"
 
-	"gitlab.com/mister11/productive-cli/internal/client"
-	"gitlab.com/mister11/productive-cli/internal/config"
-	"gitlab.com/mister11/productive-cli/internal/log"
-	"gitlab.com/mister11/productive-cli/internal/prompt"
+	"github.com/mister11/productive-cli/internal/client"
+	"github.com/mister11/productive-cli/internal/config"
+	"github.com/mister11/productive-cli/internal/log"
+	"github.com/mister11/productive-cli/internal/prompt"
 )
 
 func Init(client client.ProductiveClient) {

@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"time"
 
-	"gitlab.com/mister11/productive-cli/internal/datetime"
+	"github.com/mister11/productive-cli/internal/datetime"
 )
 
 type OrganizationMembership struct {

@@ -3,7 +3,7 @@ package prompt
 import (
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
-	"gitlab.com/mister11/productive-cli/internal/utils"
+	"github.com/mister11/productive-cli/internal/utils"
 )
 
 func InputMasked(message string) string {

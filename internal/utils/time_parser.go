@@ -2,7 +2,7 @@ package utils
 
 import (
 	"errors"
-	"gitlab.com/mister11/productive-cli/internal/log"
+	"github.com/mister11/productive-cli/internal/log"
 	"regexp"
 	"strconv"
 )

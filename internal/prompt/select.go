@@ -2,8 +2,8 @@ package prompt
 
 import (
 	"github.com/manifoldco/promptui"
-	"gitlab.com/mister11/productive-cli/internal/config"
-	"gitlab.com/mister11/productive-cli/internal/utils"
+	"github.com/mister11/productive-cli/internal/config"
+	"github.com/mister11/productive-cli/internal/utils"
 )
 
 func SelectOne(label string, options []interface{}) interface{} {

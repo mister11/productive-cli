@@ -1,16 +1,16 @@
 package action
 
 import (
-	"gitlab.com/mister11/productive-cli/internal/utils"
+	"github.com/mister11/productive-cli/internal/utils"
 	"strconv"
 	"strings"
 	"time"
 
-	"gitlab.com/mister11/productive-cli/internal/client"
-	"gitlab.com/mister11/productive-cli/internal/client/model"
-	"gitlab.com/mister11/productive-cli/internal/config"
-	"gitlab.com/mister11/productive-cli/internal/datetime"
-	"gitlab.com/mister11/productive-cli/internal/prompt"
+	"github.com/mister11/productive-cli/internal/client"
+	"github.com/mister11/productive-cli/internal/client/model"
+	"github.com/mister11/productive-cli/internal/config"
+	"github.com/mister11/productive-cli/internal/datetime"
+	"github.com/mister11/productive-cli/internal/prompt"
 )
 
 func TrackProject(productiveClient client.ProductiveClient, trackProjectRequest TrackProjectRequest) {

@@ -2,11 +2,11 @@ package config
 
 import (
 	"encoding/json"
-	"gitlab.com/mister11/productive-cli/internal/client/model"
+	"github.com/mister11/productive-cli/internal/client/model"
 	"os"
 	"path/filepath"
 
-	"gitlab.com/mister11/productive-cli/internal/utils"
+	"github.com/mister11/productive-cli/internal/utils"
 )
 
 const configFolder = ".productive"
