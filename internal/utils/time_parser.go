@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-var timeRegex = regexp.MustCompile("^(?:(\\d+)[:])?(\\d+)$"				)
+var timeRegex = regexp.MustCompile(`^(?:(\d+)[:])?(\d+)$`)
 
 // parses time of format HH:mm to minutes
 // needed for API which accepts minutes

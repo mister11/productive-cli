@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    name: Setup job
+    name: Lint, build and test
     runs-on: ubuntu-latest
     steps:
       - name: Install Go
