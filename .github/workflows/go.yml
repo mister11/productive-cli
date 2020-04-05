@@ -41,6 +41,7 @@ jobs:
     name: Build
     needs: setup
     runs-on: ubuntu-latest
+    steps:
       - name: Build
         run: go build -v ./...
 
