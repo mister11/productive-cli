@@ -1,4 +1,4 @@
-name: Go
+name: Build
 
 on:
   push
@@ -36,4 +36,13 @@ jobs:
           staticcheck ./...
 
       - name: Test
-        run: go test -v ./...
+        run: |
+          go test -v -coverprofile cover.out ./...
+          cat cover.out >> coverage.txt
+
+      - name: Upload test coverage
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.txt
+          fail_ci_if_error: true
