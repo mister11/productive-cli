@@ -7,10 +7,10 @@ import (
 	"strconv"
 )
 
-var timeRegex = regexp.MustCompile("^(?:(\\d+)[:])?(\\d+)$"				)
+var timeRegex = regexp.MustCompile(`^(?:(\d+)[:])?(\d+)$`)
 
 // parses time of format HH:mm to minutes
-// needed for API which accepts minutes
+// needed for the Productive API which accepts minutes
 func ParseTime(time string) int {
 	matches := timeRegex.FindStringSubmatch(time)
 	if len(matches) != 3 {
