@@ -40,6 +40,7 @@ jobs:
         run: go build -v ./...
   test:
     name: Test
+    runs-on: ubuntu-latest
     steps:
       - name: Test
         run: go test -v ./...
