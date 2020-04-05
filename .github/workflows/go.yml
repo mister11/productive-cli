@@ -4,17 +4,17 @@ on:
   push
 
 jobs:
-  setup:
+  build:
     name: Setup job
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go 1.14
+      - name: Install Go
         uses: actions/setup-go@v1
         with:
           go-version: 1.14
         id: go
 
-      - name: Check out code into the Go module directory
+      - name: Checkout
         uses: actions/checkout@v2
 
       - name: Get dependencies
@@ -25,30 +25,22 @@ jobs:
               dep ensure
           fi
 
-  check:
-    name: Check
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - name: Run staticheck
+      - uses: actions/cache@v1
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Run static analysis
         run: |
           # https://github.com/actions/setup-go/issues/14
           export PATH=${PATH}:`go env GOPATH`/bin
           go get -u honnef.co/go/tools/cmd/staticcheck
           staticcheck ./...
 
-  build:
-    name: Build
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
       - name: Build
         run: go build -v ./...
 
-  test:
-    name: Test
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
       - name: Test
         run: go test -v ./...
