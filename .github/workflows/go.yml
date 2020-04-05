@@ -25,12 +25,12 @@ jobs:
 #          restore-keys: |
 #            ${{ runner.os }}-go-
 
-#      - name: Run static analysis
-#        run: |
-#          # https://github.com/actions/setup-go/issues/14
-#          export PATH=${PATH}:`go env GOPATH`/bin
-#          go get -u honnef.co/go/tools/cmd/staticcheck
-#          staticcheck ./...
+      - name: Run static analysis
+        run: |
+          # https://github.com/actions/setup-go/issues/14
+          export PATH=${PATH}:`go env GOPATH`/bin
+          go get -u honnef.co/go/tools/cmd/staticcheck
+          staticcheck ./...
 
       - name: Build
         run: go build -v ./...

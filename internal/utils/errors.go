@@ -7,4 +7,4 @@ import (
 func ReportError(message string, err error) {
 	log.Error(message)
 	panic(err)
-g
+}
