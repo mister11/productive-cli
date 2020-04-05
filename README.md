@@ -26,6 +26,8 @@ Tracking has 2 available commands:
 
 Each command has an optional `-d` flag to specify a particular date in YYYY-MM-DD format (e.g. `productive-cli -d 2020-04-01 track food`). In case flag is not provided, command will used today's date.
 
+When asked for time, you can provide number of minutes (e.g. 120) or standard HH:mm format (e.g 8:00; leading zero is optional).
+
 #### Food
 
 `food` command will track 30 minutes on food budget.
