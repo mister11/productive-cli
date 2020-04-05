@@ -16,14 +16,6 @@ import (
 
 const baseURL = "https://api.productive.io/api/v2/"
 const orgID = "1"
-const tokenFile = ".productive/token"
-
-type SearchType int
-
-const (
-	Month SearchType = iota
-	Year
-)
 
 type ProductiveClient struct {
 	client GenericClient
@@ -74,10 +66,7 @@ func (client *ProductiveClient) SearchDeals(query string, day time.Time) []inter
 	dealInterfaces := json.FromJsonMany(response, reflect.TypeOf(new(model.Deal)))
 
 	var deals []interface{}
-
-	for _, dealInterface := range dealInterfaces {
-		deals = append(deals, dealInterface)
-	}
+	deals = append(deals, dealInterfaces...)
 
 	return deals
 }
@@ -94,10 +83,7 @@ func (client *ProductiveClient) SearchService(query string, dealID string, day t
 	serviceInterfaces := json.FromJsonMany(resp, reflect.TypeOf(new(model.Service)))
 
 	var services []interface{}
-
-	for _, serviceInterface := range serviceInterfaces {
-		services = append(services, serviceInterface)
-	}
+	services = append(services, serviceInterfaces...)
 
 	return services
 }
