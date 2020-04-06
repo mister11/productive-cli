@@ -1,14 +1,11 @@
 package app
 
 import (
-	"github.com/urfave/cli/v2"
 	"github.com/mister11/productive-cli/internal/action"
-	"github.com/mister11/productive-cli/internal/client"
+	"github.com/urfave/cli/v2"
 )
 
 func CreateProductiveCliApp() *cli.App {
-	productiveClient := client.NewProductiveClient()
-
 	return &cli.App{
 		Name:                 "Productive CLI",
 		Usage:                "Manage Productive from your terminal!",
@@ -32,7 +29,7 @@ func CreateProductiveCliApp() *cli.App {
 								IsWeekTracking: c.Bool("w"),
 								Day:            c.String("d"),
 							}
-							action.TrackFood(productiveClient, trackFoodRequest)
+							action.TrackFood(trackFoodRequest)
 							return nil
 						},
 						Flags: []cli.Flag{
@@ -49,7 +46,7 @@ func CreateProductiveCliApp() *cli.App {
 							trackProjectRequest := action.TrackProjectRequest{
 								Day: c.String("d"),
 							}
-							action.TrackProject(productiveClient, trackProjectRequest)
+							action.TrackProject(trackProjectRequest)
 							return nil
 						},
 					},
@@ -59,7 +56,7 @@ func CreateProductiveCliApp() *cli.App {
 				Name:  "init",
 				Usage: "Initializes user data",
 				Action: func(c *cli.Context) error {
-					action.Init(productiveClient)
+					action.Init()
 					return nil
 				},
 			},

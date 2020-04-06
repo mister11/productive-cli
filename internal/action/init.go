@@ -9,20 +9,20 @@ import (
 	"github.com/mister11/productive-cli/internal/prompt"
 )
 
-func Init(client client.ProductiveClient) {
+func Init() {
 	token := prompt.InputMasked("Enter Productive API token")
 
 	log.Info("Saving API token...")
 	config.SaveToken(token)
 
+	productiveClient := client.NewProductiveClient()
 	log.Info("Fetching user organizations...")
-	organizationMemberships := client.GetOrganizationMembership()
+	organizationMemberships := productiveClient.GetOrganizationMembership()
 
 	if len(organizationMemberships) > 1 {
 		utils.ReportError("Organization selection not yet supported :(", nil)
 	}
 
-	log.Debug(organizationMemberships)
 	userID := organizationMemberships[0].User.ID
 
 	config.SaveUserID(userID)
