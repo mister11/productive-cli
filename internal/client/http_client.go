@@ -9,24 +9,22 @@ import (
 
 type GenericClient struct {
 	baseURL string
-	headers map[string]string
 	client  *http.Client
 }
 
-func NewGenericClient(baseURL string, headers map[string]string) GenericClient {
+func NewGenericClient(baseURL string) GenericClient {
 	client := GenericClient{}
 	client.baseURL = baseURL
-	client.headers = headers
 	client.client = &http.Client{}
 	return client
 }
 
-func (client *GenericClient) Get(uri string) io.ReadCloser {
+func (client *GenericClient) Get(uri string, headers map[string]string) io.ReadCloser {
 	req, err := http.NewRequest("GET", client.baseURL+uri, nil)
 	if err != nil {
 		utils.ReportError("Failed to create a request.", err)
 	}
-	for key, value := range client.headers {
+	for key, value := range headers {
 		req.Header.Add(key, value)
 	}
 	resp, err := client.client.Do(req)
@@ -37,12 +35,12 @@ func (client *GenericClient) Get(uri string) io.ReadCloser {
 	return resp.Body
 }
 
-func (client *GenericClient) Post(uri string, body io.Reader) io.ReadCloser {
+func (client *GenericClient) Post(uri string, body io.Reader, headers map[string]string) io.ReadCloser {
 	req, err := http.NewRequest("POST", client.baseURL+uri, body)
 	if err != nil {
 		utils.ReportError("Failed to create a request", err)
 	}
-	for key, value := range client.headers {
+	for key, value := range headers {
 		req.Header.Add(key, value)
 	}
 	resp, err := client.client.Do(req)

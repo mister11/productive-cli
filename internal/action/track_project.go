@@ -13,7 +13,7 @@ import (
 	"github.com/mister11/productive-cli/internal/prompt"
 )
 
-func TrackProject(trackProjectRequest TrackProjectRequest) {
+func TrackProject(productiveClient client.ProductiveClient, trackProjectRequest TrackProjectRequest) {
 	existingProject := selectExistingProject()
 	var date time.Time
 	if trackProjectRequest.Day != "" {
@@ -21,7 +21,6 @@ func TrackProject(trackProjectRequest TrackProjectRequest) {
 	} else {
 		date = datetime.Now()
 	}
-	productiveClient := client.NewProductiveClient()
 	if existingProject != nil {
 		project := existingProject.(config.Project)
 		trackSavedProject(productiveClient, project, date)

@@ -23,22 +23,18 @@ type ProductiveClient struct {
 
 func NewProductiveClient() ProductiveClient {
 	client := ProductiveClient{}
-	client.client = NewGenericClient(baseURL, getHeaders())
+	client.client = NewGenericClient(baseURL)
 	return client
 }
 
 func (client *ProductiveClient) CreateTimeEntry(timeEntry *model.TimeEntry) {
 	jsonBytes := json.ToJsonEmbedded(timeEntry)
-	body := client.client.Post("time_entries", bytes.NewReader(jsonBytes))
+	body := client.client.Post("time_entries", bytes.NewReader(jsonBytes), getHeaders())
 	defer body.Close()
 }
 
-func (client *ProductiveClient) CreateFoodTimeEntry(timeEntry *model.TimeEntry) {
-	client.CreateTimeEntry(timeEntry)
-}
-
 func (client *ProductiveClient) GetOrganizationMembership() []model.OrganizationMembership {
-	response := client.client.Get("organization_memberships")
+	response := client.client.Get("organization_memberships", getHeaders())
 	defer response.Close()
 
 	orgMembershipInterfaces := json.FromJsonMany(response, reflect.TypeOf(new(model.OrganizationMembership)))
@@ -60,7 +56,7 @@ func (client *ProductiveClient) SearchDeals(query string, day time.Time) []inter
 	uri := fmt.Sprintf("deals?filter[query]=%s&filter[date][lt_eq]=%s&filter[end_date][gt_eq]=%s",
 		url.QueryEscape(query), dayFormatted, dayFormatted)
 
-	response := client.client.Get(uri)
+	response := client.client.Get(uri, getHeaders())
 	defer response.Close()
 
 	dealInterfaces := json.FromJsonMany(response, reflect.TypeOf(new(model.Deal)))
@@ -77,7 +73,7 @@ func (client *ProductiveClient) SearchService(query string, dealID string, day t
 	uri := fmt.Sprintf(`services?filter[name]=%s&filter[after]=%s&filter[before]=%s&filter[deal_id]=%s`,
 		url.QueryEscape(query), dayFormatted, dayFormatted, dealID)
 
-	resp := client.client.Get(uri)
+	resp := client.client.Get(uri, getHeaders())
 	defer resp.Close()
 
 	serviceInterfaces := json.FromJsonMany(resp, reflect.TypeOf(new(model.Service)))
