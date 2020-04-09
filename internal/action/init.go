@@ -9,7 +9,7 @@ import (
 	"github.com/mister11/productive-cli/internal/prompt"
 )
 
-func Init(productiveClient client.ProductiveClient) {
+func Init(productiveClient client.TrackingClient) {
 	token := prompt.InputMasked("Enter Productive API token")
 
 	log.Info("Saving API token...")

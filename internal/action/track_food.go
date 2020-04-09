@@ -10,7 +10,7 @@ import (
 	"github.com/mister11/productive-cli/internal/log"
 )
 
-func TrackFood(productiveClient client.ProductiveClient, trackFoodRequest TrackFoodRequest) {
+func TrackFood(productiveClient client.TrackingClient, trackFoodRequest TrackFoodRequest) {
 	if !trackFoodRequest.IsValid() {
 		log.Error("You've provided both week and day tracking so I don't know what to do.")
 		return
@@ -26,7 +26,7 @@ func TrackFood(productiveClient client.ProductiveClient, trackFoodRequest TrackF
 	}
 }
 
-func trackFood(productiveClient client.ProductiveClient, days ...time.Time) {
+func trackFood(productiveClient client.TrackingClient, days ...time.Time) {
 	userID := config.GetUserID()
 	for _, day := range days {
 		log.Info("Tracking food for " + datetime.Format(day))
@@ -36,7 +36,7 @@ func trackFood(productiveClient client.ProductiveClient, days ...time.Time) {
 	}
 }
 
-func findFoodService(productiveClient client.ProductiveClient, day time.Time) *model.Service {
+func findFoodService(productiveClient client.TrackingClient, day time.Time) *model.Service {
 	deal := productiveClient.SearchDeals("Operations general", day)[0].(*model.Deal)
 	service := productiveClient.SearchService("Food", deal.ID, day)[0].(*model.Service)
 	return service

@@ -13,7 +13,7 @@ import (
 	"github.com/mister11/productive-cli/internal/prompt"
 )
 
-func TrackProject(productiveClient client.ProductiveClient, trackProjectRequest TrackProjectRequest) {
+func TrackProject(productiveClient client.TrackingClient, trackProjectRequest TrackProjectRequest) {
 	existingProject := selectExistingProject()
 	var date time.Time
 	if trackProjectRequest.Day != "" {
@@ -29,7 +29,7 @@ func TrackProject(productiveClient client.ProductiveClient, trackProjectRequest 
 	}
 }
 
-func trackSavedProject(productiveClient client.ProductiveClient, project config.Project, date time.Time) {
+func trackSavedProject(productiveClient client.TrackingClient, project config.Project, date time.Time) {
 	config.RemoveExistingProject(project)
 	deal, service := findProjectInfo(productiveClient, project, date)
 	duration := utils.ParseTime(prompt.Input("Time"))
@@ -39,7 +39,7 @@ func trackSavedProject(productiveClient client.ProductiveClient, project config.
 	config.SaveProjectToConfig(config.NewProject(*deal, *service))
 }
 
-func trackNewProject(productiveClient client.ProductiveClient, date time.Time) {
+func trackNewProject(productiveClient client.TrackingClient, date time.Time) {
 	selectedDeal := searchNewDeal(productiveClient, date)
 	selectedService := searchNewService(productiveClient, selectedDeal, date)
 
@@ -61,7 +61,7 @@ func selectExistingProject() interface{} {
 	return selectedProject
 }
 
-func findProjectInfo(productiveClient client.ProductiveClient, existingProject config.Project, day time.Time) (*model.Deal, *model.Service) {
+func findProjectInfo(productiveClient client.TrackingClient, existingProject config.Project, day time.Time) (*model.Deal, *model.Service) {
 	deals := productiveClient.SearchDeals(existingProject.DealName, day)
 	deal := deals[0].(*model.Deal)
 	services := productiveClient.SearchService(existingProject.ServiceName, deal.ID, day)
@@ -69,13 +69,13 @@ func findProjectInfo(productiveClient client.ProductiveClient, existingProject c
 	return deal, service
 }
 
-func searchNewDeal(productiveClient client.ProductiveClient, day time.Time) *model.Deal {
+func searchNewDeal(productiveClient client.TrackingClient, day time.Time) *model.Deal {
 	dealQuery := prompt.Input("Search project")
 	deals := productiveClient.SearchDeals(dealQuery, day)
 	return prompt.SelectOne("Select project", deals).(*model.Deal)
 }
 
-func searchNewService(productiveClient client.ProductiveClient, deal *model.Deal, day time.Time) *model.Service {
+func searchNewService(productiveClient client.TrackingClient, deal *model.Deal, day time.Time) *model.Service {
 	serviceQuery := prompt.Input("Search service")
 	services := productiveClient.SearchService(serviceQuery, deal.ID, day)
 	return prompt.SelectOne("Select service", services).(*model.Service)

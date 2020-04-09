@@ -21,8 +21,8 @@ type ProductiveClient struct {
 	client GenericClient
 }
 
-func NewProductiveClient() ProductiveClient {
-	client := ProductiveClient{}
+func NewProductiveClient() *ProductiveClient {
+	client := &ProductiveClient{}
 	client.client = NewGenericClient(baseURL)
 	return client
 }
