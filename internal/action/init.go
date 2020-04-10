@@ -6,11 +6,11 @@ import (
 	"github.com/mister11/productive-cli/internal/client"
 	"github.com/mister11/productive-cli/internal/config"
 	"github.com/mister11/productive-cli/internal/log"
-	"github.com/mister11/productive-cli/internal/prompt"
+	"github.com/mister11/productive-cli/internal/stdin"
 )
 
-func Init(productiveClient client.TrackingClient) {
-	token := prompt.InputMasked("Enter Productive API token")
+func Init(productiveClient client.TrackingClient, promptUiStdin stdin.Stdin) {
+	token := promptUiStdin.InputMasked("Enter Productive API token")
 
 	log.Info("Saving API token...")
 	config.SaveToken(token)

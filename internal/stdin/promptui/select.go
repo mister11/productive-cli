@@ -1,4 +1,4 @@
-package prompt
+package promptui
 
 import (
 	"github.com/manifoldco/promptui"
@@ -6,7 +6,7 @@ import (
 	"github.com/mister11/productive-cli/internal/utils"
 )
 
-func SelectOne(label string, options []interface{}) interface{} {
+func (promptUiStdin *PromptUiStdin) SelectOne(label string, options []interface{}) interface{} {
 	prompt := promptui.Select{
 		Label: label,
 		Items: options,
@@ -26,7 +26,7 @@ func SelectOne(label string, options []interface{}) interface{} {
 	return options[index]
 }
 
-func SelectOneWithSearch(label string, options []config.Project, searchFunction func(string, int) bool) interface{} {
+func (promptUiStdin *PromptUiStdin) SelectOneWithSearch(label string, options []config.Project, searchFunction func(string, int) bool) interface{} {
 	if len(options) == 0 {
 		return nil
 	}

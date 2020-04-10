@@ -3,11 +3,13 @@ package app
 import (
 	"github.com/mister11/productive-cli/internal/action"
 	"github.com/mister11/productive-cli/internal/client"
+	"github.com/mister11/productive-cli/internal/stdin/promptui"
 	"github.com/urfave/cli/v2"
 )
 
 func CreateProductiveCliApp() *cli.App {
 	productiveClient := client.NewProductiveClient()
+	stdin := promptui.NewPromptUiStdin()
 	return &cli.App{
 		Name:                 "Productive CLI",
 		Usage:                "Manage Productive from your terminal!",
@@ -48,7 +50,7 @@ func CreateProductiveCliApp() *cli.App {
 							trackProjectRequest := action.TrackProjectRequest{
 								Day: c.String("d"),
 							}
-							action.TrackProject(productiveClient, trackProjectRequest)
+							action.TrackProject(productiveClient, stdin, trackProjectRequest)
 							return nil
 						},
 					},
@@ -58,7 +60,7 @@ func CreateProductiveCliApp() *cli.App {
 				Name:  "init",
 				Usage: "Initializes user data",
 				Action: func(c *cli.Context) error {
-					action.Init(productiveClient)
+					action.Init(productiveClient, stdin)
 					return nil
 				},
 			},
