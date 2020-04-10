@@ -19,22 +19,24 @@ const orgID = "1"
 
 type ProductiveClient struct {
 	client GenericClient
+	configManager config.ConfigManager
 }
 
-func NewProductiveClient() *ProductiveClient {
+func NewProductiveClient(configManager config.ConfigManager) *ProductiveClient {
 	client := &ProductiveClient{}
 	client.client = NewGenericClient(baseURL)
+	client.configManager = configManager
 	return client
 }
 
 func (client *ProductiveClient) CreateTimeEntry(timeEntry *model.TimeEntry) {
 	jsonBytes := json.ToJsonEmbedded(timeEntry)
-	body := client.client.Post("time_entries", bytes.NewReader(jsonBytes), getHeaders())
+	body := client.client.Post("time_entries", bytes.NewReader(jsonBytes), client.getHeaders())
 	defer body.Close()
 }
 
 func (client *ProductiveClient) GetOrganizationMembership() []model.OrganizationMembership {
-	response := client.client.Get("organization_memberships", getHeaders())
+	response := client.client.Get("organization_memberships", client.getHeaders())
 	defer response.Close()
 
 	orgMembershipInterfaces := json.FromJsonMany(response, reflect.TypeOf(new(model.OrganizationMembership)))
@@ -56,7 +58,7 @@ func (client *ProductiveClient) SearchDeals(query string, day time.Time) []inter
 	uri := fmt.Sprintf("deals?filter[query]=%s&filter[date][lt_eq]=%s&filter[end_date][gt_eq]=%s",
 		url.QueryEscape(query), dayFormatted, dayFormatted)
 
-	response := client.client.Get(uri, getHeaders())
+	response := client.client.Get(uri, client.getHeaders())
 	defer response.Close()
 
 	dealInterfaces := json.FromJsonMany(response, reflect.TypeOf(new(model.Deal)))
@@ -73,7 +75,7 @@ func (client *ProductiveClient) SearchService(query string, dealID string, day t
 	uri := fmt.Sprintf(`services?filter[name]=%s&filter[after]=%s&filter[before]=%s&filter[deal_id]=%s`,
 		url.QueryEscape(query), dayFormatted, dayFormatted, dealID)
 
-	resp := client.client.Get(uri, getHeaders())
+	resp := client.client.Get(uri, client.getHeaders())
 	defer resp.Close()
 
 	serviceInterfaces := json.FromJsonMany(resp, reflect.TypeOf(new(model.Service)))
@@ -84,10 +86,10 @@ func (client *ProductiveClient) SearchService(query string, dealID string, day t
 	return services
 }
 
-func getHeaders() map[string]string {
+func (client *ProductiveClient) getHeaders() map[string]string {
 	headers := map[string]string{}
 	headers["Content-Type"] = "application/vnd.api+json"
-	headers["X-Auth-Token"] = config.GetToken()
+	headers["X-Auth-Token"] = client.configManager.GetToken()
 	headers["X-Organization-Id"] = orgID
 	return headers
 }

@@ -9,11 +9,11 @@ import (
 	"github.com/mister11/productive-cli/internal/stdin"
 )
 
-func Init(productiveClient client.TrackingClient, promptUiStdin stdin.Stdin) {
+func Init(productiveClient client.TrackingClient, promptUiStdin stdin.Stdin, configManager config.ConfigManager) {
 	token := promptUiStdin.InputMasked("Enter Productive API token")
 
 	log.Info("Saving API token...")
-	config.SaveToken(token)
+	configManager.SaveToken(token)
 
 	log.Info("Fetching user organizations...")
 	organizationMemberships := productiveClient.GetOrganizationMembership()
@@ -24,6 +24,6 @@ func Init(productiveClient client.TrackingClient, promptUiStdin stdin.Stdin) {
 
 	userID := organizationMemberships[0].User.ID
 
-	config.SaveUserID(userID)
+	configManager.SaveUserID(userID)
 	log.Info("User ID saved. You can now use any CLI command available.")
 }

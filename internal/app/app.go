@@ -3,13 +3,16 @@ package app
 import (
 	"github.com/mister11/productive-cli/internal/action"
 	"github.com/mister11/productive-cli/internal/client"
+	"github.com/mister11/productive-cli/internal/config"
 	"github.com/mister11/productive-cli/internal/stdin/promptui"
 	"github.com/urfave/cli/v2"
 )
 
 func CreateProductiveCliApp() *cli.App {
-	productiveClient := client.NewProductiveClient()
 	stdin := promptui.NewPromptUiStdin()
+	configManager := config.NewFileConfigManager()
+	productiveClient := client.NewProductiveClient(configManager)
+
 	return &cli.App{
 		Name:                 "Productive CLI",
 		Usage:                "Manage Productive from your terminal!",
@@ -33,7 +36,7 @@ func CreateProductiveCliApp() *cli.App {
 								IsWeekTracking: c.Bool("w"),
 								Day:            c.String("d"),
 							}
-							action.TrackFood(productiveClient, trackFoodRequest)
+							action.TrackFood(productiveClient, configManager, trackFoodRequest)
 							return nil
 						},
 						Flags: []cli.Flag{
@@ -50,7 +53,7 @@ func CreateProductiveCliApp() *cli.App {
 							trackProjectRequest := action.TrackProjectRequest{
 								Day: c.String("d"),
 							}
-							action.TrackProject(productiveClient, stdin, trackProjectRequest)
+							action.TrackProject(productiveClient, stdin, configManager, trackProjectRequest)
 							return nil
 						},
 					},
@@ -60,7 +63,7 @@ func CreateProductiveCliApp() *cli.App {
 				Name:  "init",
 				Usage: "Initializes user data",
 				Action: func(c *cli.Context) error {
-					action.Init(productiveClient, stdin)
+					action.Init(productiveClient, stdin, configManager)
 					return nil
 				},
 			},

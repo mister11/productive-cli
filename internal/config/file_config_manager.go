@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"github.com/mister11/productive-cli/internal/client/model"
 	"os"
 	"path/filepath"
 
@@ -12,65 +11,43 @@ import (
 const configFolder = ".productive"
 const configFilename = "config"
 
-type Config struct {
-	UserID    string    `json:"user_id,omitempty"`
-	UserToken string    `json:"user_token,omitempty"`
-	Projects  []Project `json:"projects,omitempty"`
+type FileConfigManager struct{}
+
+func NewFileConfigManager() *FileConfigManager {
+	return &FileConfigManager{}
 }
 
-type Project struct {
-	DealID      string
-	DealName    string
-	ServiceID   string
-	ServiceName string
-}
-
-func NewProject(deal model.Deal, service model.Service) Project {
-	return Project{
-		DealID:      deal.ID,
-		DealName:    deal.Name,
-		ServiceID:   service.ID,
-		ServiceName: service.Name,
-	}
-}
-
-func GetToken() string {
+func (fcm *FileConfigManager) GetToken() string {
 	return loadConfig().UserToken
 }
 
-func GetUserID() string {
+func (fcm *FileConfigManager) GetUserID() string {
 	return loadConfig().UserID
 }
 
-func SaveToken(token string) {
+func (fcm *FileConfigManager) SaveToken(token string) {
 	config := loadConfig()
-
 	config.UserToken = token
-
 	saveConfig(config)
 }
 
-func SaveUserID(userID string) {
+func (fcm *FileConfigManager) SaveUserID(userID string) {
 	config := loadConfig()
-
 	config.UserID = userID
-
 	saveConfig(config)
 }
 
-func SaveProjectToConfig(project Project) {
+func (fcm *FileConfigManager) SaveProject(project Project) {
 	config := loadConfig()
-
 	config.Projects = append(config.Projects, project)
-
 	saveConfig(config)
 }
 
-func GetSavedProjects() []Project {
+func (fcm *FileConfigManager) GetSavedProjects() []Project {
 	return loadConfig().Projects
 }
 
-func RemoveExistingProject(project Project) {
+func (fcm *FileConfigManager) RemoveExistingProject(project Project) {
 	config := loadConfig()
 
 	var projects []Project
@@ -79,6 +56,7 @@ func RemoveExistingProject(project Project) {
 			projects = append(projects, savedProject)
 		}
 	}
+
 	config.Projects = projects
 	saveConfig(config)
 }
