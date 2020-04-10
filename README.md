@@ -1,6 +1,6 @@
 # Productive CLI
 
-![Build status](https://github.com/mister11/productive-cli/workflows/Build/badge.svg) [![Go Report Card](https://goreportcard.com/badge/github.com/mister11/productive-cli)](https://github.com/mister11/productive-cli) [![codecov](https://codecov.io/gh/mister11/productive-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/mister11/productive-cli)
+![Build status](https://github.com/mister11/productive-cli/workflows/Build/badge.svg) [![License MIT](https://img.shields.io/badge/License-MIT-brightgreen)](https://github.com/mister11/productive-cli/blob/master/LICENSE) [![Go Report Card](https://goreportcard.com/badge/github.com/mister11/productive-cli)](https://github.com/mister11/productive-cli) [![codecov](https://codecov.io/gh/mister11/productive-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/mister11/productive-cli)
 
 CLI enables you easier tracking on [Productive](https://productive.io) from your terminal.
 
