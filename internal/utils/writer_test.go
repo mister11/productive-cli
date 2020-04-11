@@ -13,19 +13,17 @@ func TestWriteFile(t *testing.T) {
 		panic(err)
 	}
 	defer syscall.Unlink(f.Name())
-	content := []byte("Test string")
-	WriteFile(f.Name(), content)
+	expectedData := []byte("Test string")
+	WriteFile(f.Name(), expectedData)
 
-	writtenData, err := ioutil.ReadAll(f)
+	actualData, err := ioutil.ReadAll(f)
 	if err != nil {
 		panic(err)
 	}
-	assert.Equal(t, content, writtenData)
+	assert.Equal(t, expectedData, actualData)
 }
 
 func TestWriteFileMissing(t *testing.T) {
 	content := []byte("Test string")
-	WriteFile("nonexistingfile", content)
-	defer syscall.Unlink("nonexistingfile")
 	assert.Panics(t, func() { WriteFile("", content) })
 }
