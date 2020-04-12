@@ -2,9 +2,6 @@ package model
 
 import (
 	"strconv"
-	"time"
-
-	"github.com/mister11/productive-cli/internal/datetime"
 )
 
 type OrganizationMembership struct {
@@ -32,10 +29,10 @@ type TimeEntry struct {
 	Budget *Service `jsonapi:"relation,service"`
 }
 
-func NewTimeEntry(notes string, duration int, userID string, service *Service, date time.Time) *TimeEntry {
+func NewTimeEntry(notes string, duration int, userID string, service *Service, date string) *TimeEntry {
 	return &TimeEntry{
 		ID:     "0",
-		Date:   datetime.Format(date),
+		Date:   date,
 		Note:   notes,
 		Time:   strconv.Itoa(duration),
 		User:   &Person{ID: userID},

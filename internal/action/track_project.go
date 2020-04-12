@@ -12,39 +12,58 @@ import (
 	"github.com/mister11/productive-cli/internal/stdin"
 )
 
-func TrackProject(productiveClient client.TrackingClient, stdin stdin.Stdin, configManager config.ConfigManager, trackProjectRequest TrackProjectRequest) {
+func TrackProject(
+	productiveClient client.TrackingClient,
+	stdin stdin.Stdin,
+	configManager config.ConfigManager,
+	dateTimeProvider datetime.DateTimeProvider,
+	trackProjectRequest TrackProjectRequest,
+) {
 	existingProject := selectExistingProject(stdin, configManager)
 	var date time.Time
 	if trackProjectRequest.Day != "" {
-		date = datetime.ToISODate(trackProjectRequest.Day)
+		date = dateTimeProvider.ToISOTime(trackProjectRequest.Day)
 	} else {
-		date = datetime.Now()
+		date = dateTimeProvider.Now()
 	}
 	if existingProject != nil {
 		project := existingProject.(config.Project)
-		trackSavedProject(productiveClient, stdin, configManager, project, date)
+		trackSavedProject(productiveClient, stdin, configManager, dateTimeProvider, project, date)
 	} else {
-		trackNewProject(productiveClient, stdin, configManager, date)
+		trackNewProject(productiveClient, stdin, configManager, dateTimeProvider, date)
 	}
 }
 
-func trackSavedProject(productiveClient client.TrackingClient, stdin stdin.Stdin, configManager config.ConfigManager, project config.Project, date time.Time) {
+func trackSavedProject(
+	productiveClient client.TrackingClient,
+	stdin stdin.Stdin,
+	configManager config.ConfigManager,
+	dateTimeProvider datetime.DateTimeProvider,
+	project config.Project,
+	date time.Time,
+) {
 	configManager.RemoveExistingProject(project)
 	deal, service := findProjectInfo(productiveClient, project, date)
 	duration := utils.ParseTime(stdin.Input("Time"))
 	notes := createNotes(stdin)
-	timeEntry := model.NewTimeEntry(notes, duration, configManager.GetUserID(), service, date)
+	timeEntry := model.NewTimeEntry(notes, duration, configManager.GetUserID(), service, dateTimeProvider.Format(date))
 	productiveClient.CreateTimeEntry(timeEntry)
 	configManager.SaveProject(config.NewProject(*deal, *service))
 }
 
-func trackNewProject(productiveClient client.TrackingClient, stdin stdin.Stdin, configManager config.ConfigManager, date time.Time) {
+func trackNewProject(
+	productiveClient client.TrackingClient,
+	stdin stdin.Stdin,
+	configManager config.ConfigManager,
+	dateTimeProvider datetime.DateTimeProvider,
+	date time.Time,
+) {
 	selectedDeal := searchNewDeal(productiveClient, stdin, date)
 	selectedService := searchNewService(productiveClient, stdin, selectedDeal, date)
 
 	duration := utils.ParseTime(stdin.Input("Time"))
 	notes := createNotes(stdin)
-	timeEntry := model.NewTimeEntry(notes, duration, configManager.GetUserID(), selectedService, date)
+	timeEntry := model.NewTimeEntry(notes, duration, configManager.GetUserID(), selectedService, dateTimeProvider.Format(date))
 	productiveClient.CreateTimeEntry(timeEntry)
 
 	configManager.SaveProject(config.NewProject(*selectedDeal, *selectedService))

@@ -20,12 +20,14 @@ const orgID = "1"
 type ProductiveClient struct {
 	client GenericClient
 	configManager config.ConfigManager
+	datetimeProvider datetime.DateTimeProvider
 }
 
-func NewProductiveClient(configManager config.ConfigManager) *ProductiveClient {
+func NewProductiveClient(configManager config.ConfigManager, provider datetime.DateTimeProvider) *ProductiveClient {
 	client := &ProductiveClient{}
 	client.client = NewGenericClient(baseURL)
 	client.configManager = configManager
+	client.datetimeProvider = provider
 	return client
 }
 
@@ -53,7 +55,7 @@ func (client *ProductiveClient) GetOrganizationMembership() []model.Organization
 }
 
 func (client *ProductiveClient) SearchDeals(query string, day time.Time) []interface{} {
-	dayFormatted := datetime.Format(day)
+	dayFormatted := client.datetimeProvider.Format(day)
 
 	uri := fmt.Sprintf("deals?filter[query]=%s&filter[date][lt_eq]=%s&filter[end_date][gt_eq]=%s",
 		url.QueryEscape(query), dayFormatted, dayFormatted)
@@ -70,7 +72,7 @@ func (client *ProductiveClient) SearchDeals(query string, day time.Time) []inter
 }
 
 func (client *ProductiveClient) SearchService(query string, dealID string, day time.Time) []interface{} {
-	dayFormatted := datetime.Format(day)
+	dayFormatted := client.datetimeProvider.Format(day)
 
 	uri := fmt.Sprintf(`services?filter[name]=%s&filter[after]=%s&filter[before]=%s&filter[deal_id]=%s`,
 		url.QueryEscape(query), dayFormatted, dayFormatted, dealID)

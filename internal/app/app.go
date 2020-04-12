@@ -4,6 +4,7 @@ import (
 	"github.com/mister11/productive-cli/internal/action"
 	"github.com/mister11/productive-cli/internal/client"
 	"github.com/mister11/productive-cli/internal/config"
+	"github.com/mister11/productive-cli/internal/datetime"
 	"github.com/mister11/productive-cli/internal/stdin/promptui"
 	"github.com/urfave/cli/v2"
 )
@@ -11,7 +12,8 @@ import (
 func CreateProductiveCliApp() *cli.App {
 	stdin := promptui.NewPromptUiStdin()
 	configManager := config.NewFileConfigManager()
-	productiveClient := client.NewProductiveClient(configManager)
+	dateTimeProvider := datetime.NewRealTimeDateProvider()
+	productiveClient := client.NewProductiveClient(configManager, dateTimeProvider)
 
 	return &cli.App{
 		Name:                 "Productive CLI",
@@ -36,7 +38,7 @@ func CreateProductiveCliApp() *cli.App {
 								IsWeekTracking: c.Bool("w"),
 								Day:            c.String("d"),
 							}
-							action.TrackFood(productiveClient, configManager, trackFoodRequest)
+							action.TrackFood(productiveClient, configManager, dateTimeProvider, trackFoodRequest)
 							return nil
 						},
 						Flags: []cli.Flag{

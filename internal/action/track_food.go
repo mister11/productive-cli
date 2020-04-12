@@ -10,28 +10,38 @@ import (
 	"github.com/mister11/productive-cli/internal/log"
 )
 
-func TrackFood(productiveClient client.TrackingClient, configManager config.ConfigManager, trackFoodRequest TrackFoodRequest) {
+func TrackFood(
+	productiveClient client.TrackingClient,
+	configManager config.ConfigManager,
+	dateTimeProvider datetime.DateTimeProvider,
+	trackFoodRequest TrackFoodRequest,
+) {
 	if !trackFoodRequest.IsValid() {
 		log.Error("You've provided both week and day tracking so I don't know what to do.")
 		return
 	}
 
 	if trackFoodRequest.IsWeekTracking {
-		trackFood(productiveClient, configManager, getWeekDays()...)
+		trackFood(productiveClient, configManager, dateTimeProvider, getWeekDays(dateTimeProvider)...)
 	} else if trackFoodRequest.Day != "" {
-		date := datetime.ToISODate(trackFoodRequest.Day)
-		trackFood(productiveClient, configManager, []time.Time{date}...)
+		date := dateTimeProvider.ToISOTime(trackFoodRequest.Day)
+		trackFood(productiveClient, configManager, dateTimeProvider, []time.Time{date}...)
 	} else {
-		trackFood(productiveClient, configManager, []time.Time{datetime.Now()}...)
+		trackFood(productiveClient, configManager, dateTimeProvider, []time.Time{dateTimeProvider.Now()}...)
 	}
 }
 
-func trackFood(productiveClient client.TrackingClient, configManager config.ConfigManager, days ...time.Time) {
+func trackFood(
+	productiveClient client.TrackingClient,
+	configManager config.ConfigManager,
+	dateTimeProvider datetime.DateTimeProvider,
+	days ...time.Time,
+) {
 	userID := configManager.GetUserID()
 	for _, day := range days {
-		log.Info("Tracking food for " + datetime.Format(day))
+		log.Info("Tracking food for " + dateTimeProvider.Format(day))
 		service := findFoodService(productiveClient, day)
-		timeEntry := model.NewTimeEntry("", 30, userID, service, day)
+		timeEntry := model.NewTimeEntry("", 30, userID, service, dateTimeProvider.Format(day))
 		productiveClient.CreateTimeEntry(timeEntry)
 	}
 }
@@ -42,11 +52,11 @@ func findFoodService(productiveClient client.TrackingClient, day time.Time) *mod
 	return service
 }
 
-func getWeekDays() []time.Time {
+func getWeekDays(dateTimeProvider datetime.DateTimeProvider) []time.Time {
 	var days []time.Time
 
-	start := datetime.WeekStart()
-	end := datetime.WeekEnd()
+	start := dateTimeProvider.WeekStart()
+	end := dateTimeProvider.WeekEnd()
 	for day := start; day.Day() <= end.Day(); day = day.AddDate(0, 0, 1) {
 		days = append(days, day)
 	}
