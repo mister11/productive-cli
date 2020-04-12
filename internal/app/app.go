@@ -55,7 +55,7 @@ func CreateProductiveCliApp() *cli.App {
 							trackProjectRequest := action.TrackProjectRequest{
 								Day: c.String("d"),
 							}
-							action.TrackProject(productiveClient, stdin, configManager, trackProjectRequest)
+							action.TrackProject(productiveClient, stdin, configManager, dateTimeProvider, trackProjectRequest)
 							return nil
 						},
 					},
