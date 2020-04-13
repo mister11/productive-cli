@@ -16,11 +16,22 @@ func (dateTimeProvider *RealDateTimeProvider) Now() time.Time {
 	return time.Now()
 }
 
-func (dateTimeProvider *RealDateTimeProvider) WeekStart() time.Time {
+func (dateTimeProvider *RealDateTimeProvider) GetWeekDays() []time.Time {
+	var days []time.Time
+
+	start := weekStart()
+	end := weekEnd()
+	for day := start; day.Day() <= end.Day(); day = day.AddDate(0, 0, 1) {
+		days = append(days, day)
+	}
+	return days
+}
+
+func weekStart() time.Time {
 	return now.Monday()
 }
 
-func (dateTimeProvider *RealDateTimeProvider) WeekEnd() time.Time {
+func weekEnd() time.Time {
 	return now.Sunday().AddDate(0, 0, -2)
 }
 

@@ -27,6 +27,22 @@ func (_m *DateTimeProvider) Format(_a0 time.Time) string {
 	return r0
 }
 
+// GetWeekDays provides a mock function with given fields:
+func (_m *DateTimeProvider) GetWeekDays() []time.Time {
+	ret := _m.Called()
+
+	var r0 []time.Time
+	if rf, ok := ret.Get(0).(func() []time.Time); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]time.Time)
+		}
+	}
+
+	return r0
+}
+
 // Now provides a mock function with given fields:
 func (_m *DateTimeProvider) Now() time.Time {
 	ret := _m.Called()
