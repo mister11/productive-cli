@@ -13,7 +13,7 @@ func CreateProductiveCliApp() *cli.App {
 	stdin := promptui.NewPromptUiStdin()
 	configManager := config.NewFileConfigManager()
 	dateTimeProvider := datetime.NewRealTimeDateProvider()
-	productiveClient := client.NewProductiveClient(configManager, dateTimeProvider)
+	productiveClient := client.NewProductiveClient(configManager)
 
 	return &cli.App{
 		Name:                 "Productive CLI",

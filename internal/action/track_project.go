@@ -20,17 +20,18 @@ func TrackProject(
 	trackProjectRequest TrackProjectRequest,
 ) {
 	existingProject := selectExistingProject(stdin, configManager)
-	var date time.Time
+	var day time.Time
 	if trackProjectRequest.Day != "" {
-		date = dateTimeProvider.ToISOTime(trackProjectRequest.Day)
+		day = dateTimeProvider.ToISOTime(trackProjectRequest.Day)
 	} else {
-		date = dateTimeProvider.Now()
+		day = dateTimeProvider.Now()
 	}
+	dayFormatted := dateTimeProvider.Format(day)
 	if existingProject != nil {
 		project := existingProject.(config.Project)
-		trackSavedProject(productiveClient, stdin, configManager, dateTimeProvider, project, date)
+		trackSavedProject(productiveClient, stdin, configManager, project, dayFormatted)
 	} else {
-		trackNewProject(productiveClient, stdin, configManager, dateTimeProvider, date)
+		trackNewProject(productiveClient, stdin, configManager, dayFormatted)
 	}
 }
 
@@ -38,15 +39,14 @@ func trackSavedProject(
 	productiveClient client.TrackingClient,
 	stdin stdin.Stdin,
 	configManager config.ConfigManager,
-	dateTimeProvider datetime.DateTimeProvider,
 	project config.Project,
-	date time.Time,
+	dayFormatted string,
 ) {
 	configManager.RemoveExistingProject(project)
-	deal, service := findProjectInfo(productiveClient, project, date)
+	deal, service := findProjectInfo(productiveClient, project, dayFormatted)
 	duration := utils.ParseTime(stdin.Input("Time"))
 	notes := createNotes(stdin)
-	timeEntry := model.NewTimeEntry(notes, duration, configManager.GetUserID(), service, dateTimeProvider.Format(date))
+	timeEntry := model.NewTimeEntry(notes, duration, configManager.GetUserID(), service, dayFormatted)
 	productiveClient.CreateTimeEntry(timeEntry)
 	configManager.SaveProject(config.NewProject(*deal, *service))
 }
@@ -55,15 +55,14 @@ func trackNewProject(
 	productiveClient client.TrackingClient,
 	stdin stdin.Stdin,
 	configManager config.ConfigManager,
-	dateTimeProvider datetime.DateTimeProvider,
-	date time.Time,
+	dayFormatted string,
 ) {
-	selectedDeal := searchNewDeal(productiveClient, stdin, date)
-	selectedService := searchNewService(productiveClient, stdin, selectedDeal, date)
+	selectedDeal := searchNewDeal(productiveClient, stdin, dayFormatted)
+	selectedService := searchNewService(productiveClient, stdin, selectedDeal, dayFormatted)
 
 	duration := utils.ParseTime(stdin.Input("Time"))
 	notes := createNotes(stdin)
-	timeEntry := model.NewTimeEntry(notes, duration, configManager.GetUserID(), selectedService, dateTimeProvider.Format(date))
+	timeEntry := model.NewTimeEntry(notes, duration, configManager.GetUserID(), selectedService, dayFormatted)
 	productiveClient.CreateTimeEntry(timeEntry)
 
 	configManager.SaveProject(config.NewProject(*selectedDeal, *selectedService))
@@ -79,23 +78,23 @@ func selectExistingProject(stdin stdin.Stdin, configManager config.ConfigManager
 	return selectedProject
 }
 
-func findProjectInfo(productiveClient client.TrackingClient, existingProject config.Project, day time.Time) (*model.Deal, *model.Service) {
-	deals := productiveClient.SearchDeals(existingProject.DealName, day)
+func findProjectInfo(productiveClient client.TrackingClient, existingProject config.Project, dayFormatted string) (*model.Deal, *model.Service) {
+	deals := productiveClient.SearchDeals(existingProject.DealName, dayFormatted)
 	deal := deals[0].(*model.Deal)
-	services := productiveClient.SearchService(existingProject.ServiceName, deal.ID, day)
+	services := productiveClient.SearchService(existingProject.ServiceName, deal.ID, dayFormatted)
 	service := services[0].(*model.Service)
 	return deal, service
 }
 
-func searchNewDeal(productiveClient client.TrackingClient, stdin stdin.Stdin, day time.Time) *model.Deal {
+func searchNewDeal(productiveClient client.TrackingClient, stdin stdin.Stdin, dayFormatted string) *model.Deal {
 	dealQuery := stdin.Input("Search project")
-	deals := productiveClient.SearchDeals(dealQuery, day)
+	deals := productiveClient.SearchDeals(dealQuery, dayFormatted)
 	return stdin.SelectOne("Select project", deals).(*model.Deal)
 }
 
-func searchNewService(productiveClient client.TrackingClient, stdin stdin.Stdin, deal *model.Deal, day time.Time) *model.Service {
+func searchNewService(productiveClient client.TrackingClient, stdin stdin.Stdin, deal *model.Deal, dayFormatted string) *model.Service {
 	serviceQuery := stdin.Input("Search service")
-	services := productiveClient.SearchService(serviceQuery, deal.ID, day)
+	services := productiveClient.SearchService(serviceQuery, deal.ID, dayFormatted)
 	return stdin.SelectOne("Select service", services).(*model.Service)
 }
 

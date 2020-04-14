@@ -29,10 +29,10 @@ type TimeEntry struct {
 	Budget *Service `jsonapi:"relation,service"`
 }
 
-func NewTimeEntry(notes string, duration int, userID string, service *Service, date string) *TimeEntry {
+func NewTimeEntry(notes string, duration int, userID string, service *Service, day string) *TimeEntry {
 	return &TimeEntry{
 		ID:     "0",
-		Date:   date,
+		Date:   day,
 		Note:   notes,
 		Time:   strconv.Itoa(duration),
 		User:   &Person{ID: userID},

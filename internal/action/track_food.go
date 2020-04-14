@@ -41,14 +41,14 @@ func trackFood(
 	for _, day := range days {
 		dayFormatted := dateTimeProvider.Format(day)
 		log.Info("Tracking food for " + dayFormatted)
-		service := findFoodService(productiveClient, day)
+		service := findFoodService(productiveClient, dayFormatted)
 		timeEntry := model.NewTimeEntry("", 30, userID, service, dayFormatted)
 		productiveClient.CreateTimeEntry(timeEntry)
 	}
 }
 
-func findFoodService(productiveClient client.TrackingClient, day time.Time) *model.Service {
-	deal := productiveClient.SearchDeals("Operations general", day)[0].(*model.Deal)
-	service := productiveClient.SearchService("Food", deal.ID, day)[0].(*model.Service)
+func findFoodService(productiveClient client.TrackingClient, dayFormatted string) *model.Service {
+	deal := productiveClient.SearchDeals("Operations general", dayFormatted)[0].(*model.Deal)
+	service := productiveClient.SearchService("Food", deal.ID, dayFormatted)[0].(*model.Service)
 	return service
 }

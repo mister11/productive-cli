@@ -3,8 +3,6 @@
 package mocks
 
 import (
-	time "time"
-
 	model "github.com/mister11/productive-cli/internal/client/model"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -35,13 +33,13 @@ func (_m *TrackingClient) GetOrganizationMembership() []model.OrganizationMember
 	return r0
 }
 
-// SearchDeals provides a mock function with given fields: query, dat
-func (_m *TrackingClient) SearchDeals(query string, dat time.Time) []interface{} {
-	ret := _m.Called(query, dat)
+// SearchDeals provides a mock function with given fields: query, dayFormatted
+func (_m *TrackingClient) SearchDeals(query string, dayFormatted string) []interface{} {
+	ret := _m.Called(query, dayFormatted)
 
 	var r0 []interface{}
-	if rf, ok := ret.Get(0).(func(string, time.Time) []interface{}); ok {
-		r0 = rf(query, dat)
+	if rf, ok := ret.Get(0).(func(string, string) []interface{}); ok {
+		r0 = rf(query, dayFormatted)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]interface{})
@@ -51,13 +49,13 @@ func (_m *TrackingClient) SearchDeals(query string, dat time.Time) []interface{}
 	return r0
 }
 
-// SearchService provides a mock function with given fields: query, dealID, day
-func (_m *TrackingClient) SearchService(query string, dealID string, day time.Time) []interface{} {
-	ret := _m.Called(query, dealID, day)
+// SearchService provides a mock function with given fields: query, dealID, dayFormatted
+func (_m *TrackingClient) SearchService(query string, dealID string, dayFormatted string) []interface{} {
+	ret := _m.Called(query, dealID, dayFormatted)
 
 	var r0 []interface{}
-	if rf, ok := ret.Get(0).(func(string, string, time.Time) []interface{}); ok {
-		r0 = rf(query, dealID, day)
+	if rf, ok := ret.Get(0).(func(string, string, string) []interface{}); ok {
+		r0 = rf(query, dealID, dayFormatted)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]interface{})

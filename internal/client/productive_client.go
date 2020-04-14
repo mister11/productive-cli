@@ -4,30 +4,25 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/mister11/productive-cli/internal/client/model"
-	"net/url"
-	"reflect"
-	"time"
-
 	"github.com/mister11/productive-cli/internal/config"
-	"github.com/mister11/productive-cli/internal/datetime"
 	"github.com/mister11/productive-cli/internal/json"
 	"github.com/mister11/productive-cli/internal/utils"
+	"net/url"
+	"reflect"
 )
 
 const baseURL = "https://api.productive.io/api/v2/"
 const orgID = "1"
 
 type ProductiveClient struct {
-	client GenericClient
-	configManager config.ConfigManager
-	datetimeProvider datetime.DateTimeProvider
+	client           HttpClient
+	configManager    config.ConfigManager
 }
 
-func NewProductiveClient(configManager config.ConfigManager, provider datetime.DateTimeProvider) *ProductiveClient {
+func NewProductiveClient(configManager config.ConfigManager) *ProductiveClient {
 	client := &ProductiveClient{}
-	client.client = NewGenericClient(baseURL)
+	client.client = NewHttpClient(baseURL)
 	client.configManager = configManager
-	client.datetimeProvider = provider
 	return client
 }
 
@@ -54,9 +49,7 @@ func (client *ProductiveClient) GetOrganizationMembership() []model.Organization
 	return orgMemberships
 }
 
-func (client *ProductiveClient) SearchDeals(query string, day time.Time) []interface{} {
-	dayFormatted := client.datetimeProvider.Format(day)
-
+func (client *ProductiveClient) SearchDeals(query string, dayFormatted string) []interface{} {
 	uri := fmt.Sprintf("deals?filter[query]=%s&filter[date][lt_eq]=%s&filter[end_date][gt_eq]=%s",
 		url.QueryEscape(query), dayFormatted, dayFormatted)
 
@@ -71,9 +64,7 @@ func (client *ProductiveClient) SearchDeals(query string, day time.Time) []inter
 	return deals
 }
 
-func (client *ProductiveClient) SearchService(query string, dealID string, day time.Time) []interface{} {
-	dayFormatted := client.datetimeProvider.Format(day)
-
+func (client *ProductiveClient) SearchService(query string, dealID string, dayFormatted string) []interface{} {
 	uri := fmt.Sprintf(`services?filter[name]=%s&filter[after]=%s&filter[before]=%s&filter[deal_id]=%s`,
 		url.QueryEscape(query), dayFormatted, dayFormatted, dealID)
 

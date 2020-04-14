@@ -60,7 +60,7 @@ func TestTrackFoodDay(t *testing.T) {
 	configManger.On("GetUserID").Return("101")
 
 	expectedTime, _ := time.Parse("2006-01-02", "2020-02-20")
-	mockServiceSearch(client, expectedTime)
+	mockServiceSearch(client, "2020-02-20")
 	dateTimeProvider.On("ToISOTime", "2020-02-20").Return(expectedTime)
 	dateTimeProvider.On("Format", expectedTime).Return("2020-02-20").Once()
 
@@ -87,7 +87,7 @@ func TestTrackFood(t *testing.T) {
 	dateTimeProvider.On("Now").Return(timeNow)
 	dateTimeProvider.On("Format", timeNow).Return("2020-02-20").Once()
 
-	mockServiceSearch(client, timeNow)
+	mockServiceSearch(client, "2020-02-20")
 
 	TrackFood(client, configManger, dateTimeProvider, request)
 
@@ -96,7 +96,7 @@ func TestTrackFood(t *testing.T) {
 	dateTimeProvider.AssertExpectations(t)
 }
 
-func mockServiceSearch(client *mocks.TrackingClient, time time.Time) {
+func mockServiceSearch(client *mocks.TrackingClient, dayFormatted string) {
 	deal := &model.Deal{
 		ID:      "10",
 		Name:    "Deal 1",
@@ -109,15 +109,15 @@ func mockServiceSearch(client *mocks.TrackingClient, time time.Time) {
 	}
 
 	client.
-		On("SearchDeals", "Operations general", time).
+		On("SearchDeals", "Operations general", dayFormatted).
 		Return([]interface{}{deal})
 
 	client.
-		On("SearchService", "Food", "10", time).
+		On("SearchService", "Food", "10", dayFormatted).
 		Return([]interface{}{service})
 
 	timeEntry := model.NewTimeEntry(
-		"", 30, "101", service, time.Format("2006-01-02"),
+		"", 30, "101", service, dayFormatted,
 	)
 
 	client.On("CreateTimeEntry", timeEntry).Return()
@@ -130,7 +130,7 @@ func mockDateRangeAndClient(dateTimeProvider *mocks.DateTimeProvider, client *mo
 	var dates []time.Time
 	for _, dateString := range dateStrings {
 		date, _ := time.Parse("2006-01-02", dateString)
-		mockServiceSearch(client, date)
+		mockServiceSearch(client, dateString)
 		dates = append(dates, date)
 		dateTimeProvider.
 			On("Format", date).
