@@ -1,6 +1,7 @@
 package action
 
 import (
+	"errors"
 	"github.com/mister11/productive-cli/internal/utils"
 
 	"github.com/mister11/productive-cli/internal/client"
@@ -19,7 +20,8 @@ func Init(productiveClient client.TrackingClient, promptUiStdin stdin.Stdin, con
 	organizationMemberships := productiveClient.GetOrganizationMembership()
 
 	if len(organizationMemberships) > 1 {
-		utils.ReportError("Organization selection not yet supported :(", nil)
+		utils.ReportError("Organization selection not yet supported :(",
+			errors.New("organization_selection_not_supported"))
 	}
 
 	userID := organizationMemberships[0].User.ID
