@@ -1,6 +1,7 @@
-package action
+package track
 
 import (
+	"github.com/mister11/productive-cli/internal/action"
 	"github.com/mister11/productive-cli/internal/client/model"
 	"github.com/mister11/productive-cli/mocks"
 	"github.com/stretchr/testify/mock"
@@ -10,15 +11,18 @@ import (
 
 func TestTrackFoodInvalid(t *testing.T) {
 	client := new(mocks.TrackingClient)
+	stdIn := new(mocks.Stdin)
 	configManger := new(mocks.ConfigManager)
 	dateTimeProvider := new(mocks.DateTimeProvider)
 
-	request := TrackFoodRequest{
+	trackingManger := NewTrackingManager(client, stdIn, configManger, dateTimeProvider)
+
+	request := action.TrackFoodRequest{
 		IsWeekTracking: true,
 		Day:            "2020-02-12",
 	}
 
-	TrackFood(client, configManger, dateTimeProvider, request)
+	trackingManger.TrackFood(request)
 
 	client.AssertNotCalled(t, mock.Anything)
 	configManger.AssertNotCalled(t, mock.Anything)
@@ -27,10 +31,13 @@ func TestTrackFoodInvalid(t *testing.T) {
 
 func TestTrackFoodWeek(t *testing.T) {
 	client := new(mocks.TrackingClient)
+	stdIn := new(mocks.Stdin)
 	configManger := new(mocks.ConfigManager)
 	dateTimeProvider := new(mocks.DateTimeProvider)
 
-	request := TrackFoodRequest{
+	trackingManger := NewTrackingManager(client, stdIn, configManger, dateTimeProvider)
+
+	request := action.TrackFoodRequest{
 		IsWeekTracking: true,
 		Day:            "",
 	}
@@ -39,7 +46,7 @@ func TestTrackFoodWeek(t *testing.T) {
 
 	mockDateRangeAndClient(dateTimeProvider, client)
 
-	TrackFood(client, configManger, dateTimeProvider, request)
+	trackingManger.TrackFood(request)
 
 	client.AssertExpectations(t)
 	configManger.AssertExpectations(t)
@@ -49,10 +56,13 @@ func TestTrackFoodWeek(t *testing.T) {
 
 func TestTrackFoodDay(t *testing.T) {
 	client := new(mocks.TrackingClient)
+	stdIn := new(mocks.Stdin)
 	configManger := new(mocks.ConfigManager)
 	dateTimeProvider := new(mocks.DateTimeProvider)
 
-	request := TrackFoodRequest{
+	trackingManger := NewTrackingManager(client, stdIn, configManger, dateTimeProvider)
+
+	request := action.TrackFoodRequest{
 		IsWeekTracking: false,
 		Day:            "2020-02-20",
 	}
@@ -64,7 +74,7 @@ func TestTrackFoodDay(t *testing.T) {
 	dateTimeProvider.On("ToISOTime", "2020-02-20").Return(expectedTime)
 	dateTimeProvider.On("Format", expectedTime).Return("2020-02-20").Once()
 
-	TrackFood(client, configManger, dateTimeProvider, request)
+	trackingManger.TrackFood(request)
 
 	client.AssertExpectations(t)
 	configManger.AssertExpectations(t)
@@ -73,10 +83,13 @@ func TestTrackFoodDay(t *testing.T) {
 
 func TestTrackFood(t *testing.T) {
 	client := new(mocks.TrackingClient)
+	stdIn := new(mocks.Stdin)
 	configManger := new(mocks.ConfigManager)
 	dateTimeProvider := new(mocks.DateTimeProvider)
 
-	request := TrackFoodRequest{
+	trackingManger := NewTrackingManager(client, stdIn, configManger, dateTimeProvider)
+
+	request := action.TrackFoodRequest{
 		IsWeekTracking: false,
 		Day:            "",
 	}
@@ -89,7 +102,7 @@ func TestTrackFood(t *testing.T) {
 
 	mockServiceSearch(client, "2020-02-20")
 
-	TrackFood(client, configManger, dateTimeProvider, request)
+	trackingManger.TrackFood(request)
 
 	client.AssertExpectations(t)
 	configManger.AssertExpectations(t)

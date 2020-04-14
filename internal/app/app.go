@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/mister11/productive-cli/internal/action"
+	"github.com/mister11/productive-cli/internal/action/track"
 	"github.com/mister11/productive-cli/internal/client"
 	"github.com/mister11/productive-cli/internal/config"
 	"github.com/mister11/productive-cli/internal/datetime"
@@ -14,6 +15,7 @@ func CreateProductiveCliApp() *cli.App {
 	configManager := config.NewFileConfigManager()
 	dateTimeProvider := datetime.NewRealTimeDateProvider()
 	productiveClient := client.NewProductiveClient(configManager)
+	trackingManager := track.NewTrackingManager(productiveClient, stdin, configManager, dateTimeProvider)
 
 	return &cli.App{
 		Name:                 "Productive CLI",
@@ -38,7 +40,7 @@ func CreateProductiveCliApp() *cli.App {
 								IsWeekTracking: c.Bool("w"),
 								Day:            c.String("d"),
 							}
-							action.TrackFood(productiveClient, configManager, dateTimeProvider, trackFoodRequest)
+							trackingManager.TrackFood(trackFoodRequest)
 							return nil
 						},
 						Flags: []cli.Flag{
@@ -55,7 +57,7 @@ func CreateProductiveCliApp() *cli.App {
 							trackProjectRequest := action.TrackProjectRequest{
 								Day: c.String("d"),
 							}
-							action.TrackProject(productiveClient, stdin, configManager, dateTimeProvider, trackProjectRequest)
+							trackingManager.TrackProject(trackProjectRequest)
 							return nil
 						},
 					},
