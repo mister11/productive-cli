@@ -8,8 +8,8 @@ func Debug(message interface{}) {
 	color.White("%s", message)
 }
 
-func Info(message string) {
-	color.Magenta(message)
+func Info(format string, args ...interface{}) {
+	color.Magenta(format, args)
 }
 
 func Error(message string) {

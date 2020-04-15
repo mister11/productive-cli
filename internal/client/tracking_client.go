@@ -8,5 +8,5 @@ type TrackingClient interface {
 	GetOrganizationMembership() []model.OrganizationMembership
 	CreateTimeEntry(timeEntry *model.TimeEntry)
 	SearchDeals(query string, dayFormatted string) []interface{}
-	SearchService(query string, dealID string, dayFormatted string) []interface{}
+	SearchServices(query string, dealID string, dayFormatted string) []interface{}
 }

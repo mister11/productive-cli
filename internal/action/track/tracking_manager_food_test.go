@@ -126,7 +126,7 @@ func mockServiceSearch(client *mocks.TrackingClient, dayFormatted string) {
 		Return([]interface{}{deal})
 
 	client.
-		On("SearchService", "Food", "10", dayFormatted).
+		On("SearchServices", "Food", "10", dayFormatted).
 		Return([]interface{}{service})
 
 	timeEntry := model.NewTimeEntry(

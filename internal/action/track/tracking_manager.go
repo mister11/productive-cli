@@ -61,16 +61,11 @@ func (manager *TrackingManager) trackFood(days ...time.Time) {
 	}
 }
 
-func (manager *TrackingManager) findFoodService(dayFormatted string) *model.Service {
-	deal := manager.trackingClient.SearchDeals("Operations general", dayFormatted)[0].(*model.Deal)
-	service := manager.trackingClient.SearchService("Food", deal.ID, dayFormatted)[0].(*model.Service)
-	return service
-}
-
 func (manager *TrackingManager) TrackProject(request action.TrackProjectRequest) {
 	existingProject := manager.selectExistingProject()
 	var day time.Time
 	if request.Day != "" {
+		// this also verifies a format
 		day = manager.dateTimeProvider.ToISOTime(request.Day)
 	} else {
 		day = manager.dateTimeProvider.Now()
@@ -86,27 +81,32 @@ func (manager *TrackingManager) TrackProject(request action.TrackProjectRequest)
 
 func (manager *TrackingManager) trackSavedProject(project config.Project, dayFormatted string) {
 	manager.config.RemoveExistingProject(project)
-	deal, service := manager.findProjectInfo(project, dayFormatted)
-	duration := utils.ParseTime(manager.stdIn.Input("Time"))
-	notes := manager.createNotes()
-	timeEntry := model.NewTimeEntry(notes, duration, manager.config.GetUserID(), service, dayFormatted)
-	manager.trackingClient.CreateTimeEntry(timeEntry)
+	deal, service := manager.findProjectInfo(project.DealName, project.ServiceName, dayFormatted)
+	manager.trackSelectedProject(deal, service, dayFormatted)
 	manager.config.SaveProject(config.NewProject(*deal, *service))
 }
 
 func (manager *TrackingManager) trackNewProject(dayFormatted string) {
-	selectedDeal := manager.searchNewDeal(dayFormatted)
-	selectedService := manager.searchNewService(selectedDeal, dayFormatted)
+	deal := manager.findAndSelectDeal(dayFormatted)
+	service := manager.findAndSelectService(deal, dayFormatted)
+	manager.trackSelectedProject(deal, service, dayFormatted)
+	manager.config.SaveProject(config.NewProject(*deal, *service))
+}
 
-	duration := utils.ParseTime(manager.stdIn.Input("Time"))
+func (manager *TrackingManager) trackSelectedProject(deal *model.Deal, service *model.Service, dayFormatted string) {
+	duration := manager.stdIn.Input("Time")
+	durationParsed := utils.ParseTime(duration)
 	notes := manager.createNotes()
-	timeEntry := model.NewTimeEntry(notes, duration, manager.config.GetUserID(), selectedService, dayFormatted)
+	log.Info("Tracking %s - %s with duration %d for %d", deal.Name, service.Name, durationParsed, dayFormatted)
+	timeEntry := model.NewTimeEntry(notes, durationParsed, manager.config.GetUserID(), service, dayFormatted)
 	manager.trackingClient.CreateTimeEntry(timeEntry)
-	manager.config.SaveProject(config.NewProject(*selectedDeal, *selectedService))
 }
 
 func (manager *TrackingManager) selectExistingProject() interface{} {
 	savedProjects := manager.config.GetSavedProjects()
+	if len(savedProjects) == 0 {
+		return nil
+	}
 	selectedProject := manager.stdIn.SelectOneWithSearch(
 		"Select project",
 		savedProjects,
@@ -115,23 +115,30 @@ func (manager *TrackingManager) selectExistingProject() interface{} {
 	return selectedProject
 }
 
-func (manager *TrackingManager) findProjectInfo(existingProject config.Project, dayFormatted string) (*model.Deal, *model.Service) {
-	deals := manager.trackingClient.SearchDeals(existingProject.DealName, dayFormatted)
-	deal := deals[0].(*model.Deal)
-	services := manager.trackingClient.SearchService(existingProject.ServiceName, deal.ID, dayFormatted)
-	service := services[0].(*model.Service)
+func (manager *TrackingManager) findProjectInfo(
+	dealName string,
+	serviceName string,
+	dayFormatted string,
+) (*model.Deal, *model.Service) {
+	deal := manager.trackingClient.SearchDeals(dealName, dayFormatted)[0].(*model.Deal)
+	service := manager.trackingClient.SearchServices(serviceName, deal.ID, dayFormatted)[0].(*model.Service)
 	return deal, service
 }
 
-func (manager *TrackingManager) searchNewDeal(dayFormatted string) *model.Deal {
+func (manager *TrackingManager) findFoodService(dayFormatted string) *model.Service {
+	_, service := manager.findProjectInfo("Operations general", "Food", dayFormatted)
+	return service
+}
+
+func (manager *TrackingManager) findAndSelectDeal(dayFormatted string) *model.Deal {
 	dealQuery := manager.stdIn.Input("Search project")
 	deals := manager.trackingClient.SearchDeals(dealQuery, dayFormatted)
 	return manager.stdIn.SelectOne("Select project", deals).(*model.Deal)
 }
 
-func (manager *TrackingManager) searchNewService(deal *model.Deal, dayFormatted string) *model.Service {
+func (manager *TrackingManager) findAndSelectService(deal *model.Deal, dayFormatted string) *model.Service {
 	serviceQuery := manager.stdIn.Input("Search service")
-	services := manager.trackingClient.SearchService(serviceQuery, deal.ID, dayFormatted)
+	services := manager.trackingClient.SearchServices(serviceQuery, deal.ID, dayFormatted)
 	return manager.stdIn.SelectOne("Select service", services).(*model.Service)
 }
 

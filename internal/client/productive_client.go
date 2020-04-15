@@ -64,7 +64,7 @@ func (client *ProductiveClient) SearchDeals(query string, dayFormatted string) [
 	return deals
 }
 
-func (client *ProductiveClient) SearchService(query string, dealID string, dayFormatted string) []interface{} {
+func (client *ProductiveClient) SearchServices(query string, dealID string, dayFormatted string) []interface{} {
 	uri := fmt.Sprintf(`services?filter[name]=%s&filter[after]=%s&filter[before]=%s&filter[deal_id]=%s`,
 		url.QueryEscape(query), dayFormatted, dayFormatted, dealID)
 

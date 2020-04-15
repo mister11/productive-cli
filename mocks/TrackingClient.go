@@ -49,8 +49,8 @@ func (_m *TrackingClient) SearchDeals(query string, dayFormatted string) []inter
 	return r0
 }
 
-// SearchService provides a mock function with given fields: query, dealID, dayFormatted
-func (_m *TrackingClient) SearchService(query string, dealID string, dayFormatted string) []interface{} {
+// SearchServices provides a mock function with given fields: query, dealID, dayFormatted
+func (_m *TrackingClient) SearchServices(query string, dealID string, dayFormatted string) []interface{} {
 	ret := _m.Called(query, dealID, dayFormatted)
 
 	var r0 []interface{}

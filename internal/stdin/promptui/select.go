@@ -27,9 +27,6 @@ func (promptUiStdin *PromptUiStdin) SelectOne(label string, options []interface{
 }
 
 func (promptUiStdin *PromptUiStdin) SelectOneWithSearch(label string, options []config.Project, searchFunction func(string, int) bool) interface{} {
-	if len(options) == 0 {
-		return nil
-	}
 	prompt := promptui.Select{
 		Label: label,
 		Items: options,
