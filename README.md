@@ -4,7 +4,7 @@
 
 CLI enables you easier tracking on [Productive](https://productive.io) from your terminal.
 
-**DISCLAIMER: I do not take any resposability for incorrectly tracked projects. This is still experimental and visual confirmation in the UI that everything is correct is a must**.
+**DISCLAIMER: I do not take any responsibility for incorrectly tracked projects. This is still experimental and visual confirmation in the UI that everything is correct is a must**.
 
 ## Installation
 
