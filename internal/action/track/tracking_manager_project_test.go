@@ -18,7 +18,7 @@ func TestTrackProjectWithDay(t *testing.T) {
 	trackingManger := NewTrackingManager(client, stdIn, configManger, dateTimeProvider)
 
 	day := "2020-02-20"
-	dayTime, _ := time.Parse("2016-01-02", day)
+	dayTime, _ := time.Parse("2006-01-02", day)
 
 	// no saved projects
 	configManger.On("GetSavedProjects").Return(nil).Once()
