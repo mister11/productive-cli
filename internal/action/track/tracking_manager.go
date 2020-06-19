@@ -36,7 +36,7 @@ func NewTrackingManager(
 
 func (manager *TrackingManager) TrackFood(trackFoodRequest action.TrackFoodRequest) {
 	if !trackFoodRequest.IsValid() {
-		log.Error("You've provided both week and day tracking so I don't know what to do.")
+		log.Error("You've provided both week and day tracking so I don't know what to do.", nil)
 		return
 	}
 

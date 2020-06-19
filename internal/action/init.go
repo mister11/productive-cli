@@ -10,14 +10,32 @@ import (
 	"github.com/mister11/productive-cli/internal/stdin"
 )
 
-func Init(productiveClient client.TrackingClient, promptUiStdin stdin.Stdin, configManager config.ConfigManager) {
-	token := promptUiStdin.InputMasked("Enter Productive API token")
+type LoginManger struct {
+	trackingClient client.TrackingClient
+	stdIn          stdin.Stdin
+	config         config.ConfigManager
+}
+
+func NewLoginManager(
+	trackingClient client.TrackingClient,
+	stdIn stdin.Stdin,
+	config config.ConfigManager,
+) *LoginManger {
+	return &LoginManger{
+		trackingClient: trackingClient,
+		stdIn:          stdIn,
+		config:         config,
+	}
+}
+
+func (manager *LoginManger) Init() {
+	token := manager.stdIn.InputMasked("Enter Productive API token")
 
 	log.Info("Saving API token...")
-	configManager.SaveToken(token)
+	manager.config.SaveToken(token)
 
 	log.Info("Fetching user organizations...")
-	organizationMemberships := productiveClient.GetOrganizationMembership()
+	organizationMemberships := manager.trackingClient.GetOrganizationMembership()
 
 	if len(organizationMemberships) > 1 {
 		utils.ReportError("Organization selection not yet supported :(",
@@ -26,6 +44,6 @@ func Init(productiveClient client.TrackingClient, promptUiStdin stdin.Stdin, con
 
 	userID := organizationMemberships[0].User.ID
 
-	configManager.SaveUserID(userID)
+	manager.config.SaveUserID(userID)
 	log.Info("User ID saved. You can now use any CLI command available.")
 }

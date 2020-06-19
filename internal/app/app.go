@@ -1,76 +1,36 @@
 package app
 
 import (
-	"github.com/mister11/productive-cli/internal/action"
-	"github.com/mister11/productive-cli/internal/action/track"
-	"github.com/mister11/productive-cli/internal/client"
-	"github.com/mister11/productive-cli/internal/config"
-	"github.com/mister11/productive-cli/internal/datetime"
-	"github.com/mister11/productive-cli/internal/stdin/promptui"
 	"github.com/urfave/cli/v2"
 )
 
-func CreateProductiveCliApp() *cli.App {
-	stdin := promptui.NewPromptUiStdin()
-	configManager := config.NewFileConfigManager()
-	dateTimeProvider := datetime.NewRealTimeDateProvider()
-	productiveClient := client.NewProductiveClient(configManager)
-	trackingManager := track.NewTrackingManager(productiveClient, stdin, configManager, dateTimeProvider)
+type ProductiveCLI struct {
+	app *cli.App
+}
 
+func NewProductiveCLI() *ProductiveCLI {
+	return &ProductiveCLI{
+		app: createProductiveCliApp(),
+	}
+}
+
+func (cli *ProductiveCLI) Run(args[] string) error {
+	return cli.app.Run(args)
+}
+
+func createProductiveCliApp() *cli.App {
+	commandsProvider := newProvider()
 	return &cli.App{
 		Name:                 "Productive CLI",
 		Usage:                "Manage Productive from your terminal!",
 		EnableBashCompletion: true,
+		BashComplete: cli.DefaultAppComplete,
 		Commands: []*cli.Command{
-			{
-				Name:  "track",
-				Usage: "Track time for any service",
-				Flags: []cli.Flag{
-					&cli.StringFlag{
-						Name:  "d",
-						Usage: "track particular day (format: YYYY-MM-DD)",
-					},
-				},
-				Subcommands: []*cli.Command{
-					{
-						Name:  "food",
-						Usage: "Default 30 mintues for lunch",
-						Action: func(c *cli.Context) error {
-							trackFoodRequest := action.TrackFoodRequest{
-								IsWeekTracking: c.Bool("w"),
-								Day:            c.String("d"),
-							}
-							trackingManager.TrackFood(trackFoodRequest)
-							return nil
-						},
-						Flags: []cli.Flag{
-							&cli.BoolFlag{
-								Name:  "w",
-								Usage: "track whole week",
-							},
-						},
-					},
-					{
-						Name:  "project",
-						Usage: "Track project",
-						Action: func(c *cli.Context) error {
-							trackProjectRequest := action.TrackProjectRequest{
-								Day: c.String("d"),
-							}
-							trackingManager.TrackProject(trackProjectRequest)
-							return nil
-						},
-					},
-				},
-			},
-			{
-				Name:  "init",
-				Usage: "Initializes user data",
-				Action: func(c *cli.Context) error {
-					action.Init(productiveClient, stdin, configManager)
-					return nil
-				},
-			},
+			commandsProvider.Init(),
+			commandsProvider.Track(
+				commandsProvider.TrackFood(),
+				commandsProvider.TrackProject(),
+			),
 		},
 	}
 }

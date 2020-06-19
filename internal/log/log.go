@@ -1,6 +1,9 @@
 package log
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/fatih/color"
 )
 
@@ -12,6 +15,6 @@ func Info(format string, args ...interface{}) {
 	color.Magenta(format, args)
 }
 
-func Error(message string) {
-	color.Red(message)
+func Error(format string, err error) {
+	fmt.Fprintf(os.Stderr, format, err)
 }
