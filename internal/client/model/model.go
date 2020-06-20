@@ -1,9 +1,5 @@
 package model
 
-import (
-	"strconv"
-)
-
 type OrganizationMembership struct {
 	ID   string  `jsonapi:"primary,organization_memberships"`
 	User *Person `jsonapi:"relation,person"`
@@ -29,12 +25,12 @@ type TimeEntry struct {
 	Budget *Service `jsonapi:"relation,service"`
 }
 
-func NewTimeEntry(notes string, duration int, userID string, service *Service, day string) *TimeEntry {
+func NewTimeEntry(notes string, duration string, userID string, service *Service, day string) *TimeEntry {
 	return &TimeEntry{
 		ID:     "0",
 		Date:   day,
 		Note:   notes,
-		Time:   strconv.Itoa(duration),
+		Time:   duration,
 		User:   &Person{ID: userID},
 		Budget: service,
 	}

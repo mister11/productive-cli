@@ -19,17 +19,15 @@ func (cli *ProductiveCLI) Run(args[] string) error {
 }
 
 func createProductiveCliApp() *cli.App {
-	commandsProvider := newProvider()
 	return &cli.App{
 		Name:                 "Productive CLI",
 		Usage:                "Manage Productive from your terminal!",
 		EnableBashCompletion: true,
 		BashComplete: cli.DefaultAppComplete,
 		Commands: []*cli.Command{
-			commandsProvider.Init(),
-			commandsProvider.Track(
-				commandsProvider.TrackFood(),
-				commandsProvider.TrackProject(),
+			trackCommand(
+				trackFoodSubCommand(),
+				trackProjectSubCommand(),
 			),
 		},
 	}
