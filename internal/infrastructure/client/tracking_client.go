@@ -3,7 +3,7 @@ package client
 import (
 	"time"
 
-	"github.com/mister11/productive-cli/internal/client/model"
+	"github.com/mister11/productive-cli/internal/infrastructure/client/model"
 )
 
 type TrackingClient interface {

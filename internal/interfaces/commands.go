@@ -1,4 +1,4 @@
-package app
+package interfaces
 
 import (
 	"github.com/urfave/cli/v2"
@@ -21,7 +21,7 @@ func trackCommand(subcommands ...*cli.Command) *cli.Command {
 func trackFoodSubCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "food",
-		Usage: "Default 30 mintues for lunch",
+		Usage: "Default 30 minutes for lunch",
 		Action: func(c *cli.Context) error {
 			return trackFood(c)
 		},

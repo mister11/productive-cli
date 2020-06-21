@@ -2,10 +2,10 @@ package config
 
 import (
 	"encoding/json"
+	"github.com/mister11/productive-cli/internal/domain/config"
+	"github.com/mister11/productive-cli/internal/utils"
 	"os"
 	"path/filepath"
-
-	"github.com/mister11/productive-cli/internal/utils"
 )
 
 const configFolder = ".productive"
@@ -37,20 +37,20 @@ func (fcm *FileConfigManager) SaveUserID(userID string) {
 	saveConfig(config)
 }
 
-func (fcm *FileConfigManager) SaveProject(project Project) {
+func (fcm *FileConfigManager) SaveProject(project config.Project) {
 	config := loadConfig()
 	config.Projects = append(config.Projects, project)
 	saveConfig(config)
 }
 
-func (fcm *FileConfigManager) GetSavedProjects() []Project {
+func (fcm *FileConfigManager) GetSavedProjects() []config.Project {
 	return loadConfig().Projects
 }
 
-func (fcm *FileConfigManager) RemoveExistingProject(project Project) {
+func (fcm *FileConfigManager) RemoveExistingProject(project config.Project) {
 	config := loadConfig()
 
-	var projects []Project
+	var projects []config.Project
 	for _, savedProject := range config.Projects {
 		if !(savedProject.DealID == project.DealID && savedProject.ServiceID == project.ServiceID) {
 			projects = append(projects, savedProject)
@@ -61,22 +61,22 @@ func (fcm *FileConfigManager) RemoveExistingProject(project Project) {
 	saveConfig(config)
 }
 
-func loadConfig() Config {
+func loadConfig() config.Config {
 	configPath := getConfigPath()
 	configJSON, err := utils.ReadFile(configPath)
 
 	if err != nil {
-		return Config{}
+		return config.Config{}
 	}
 
-	var config Config
+	var config config.Config
 	if err := json.Unmarshal(configJSON, &config); err != nil {
 		utils.ReportError("Error parsing config JSON", err)
 	}
 	return config
 }
 
-func saveConfig(config Config) {
+func saveConfig(config config.Config) {
 	configJSON, err := json.Marshal(config)
 	if err != nil {
 		utils.ReportError("Cannot convert config "+string(configJSON)+" to JSON", err)

@@ -1,4 +1,4 @@
-package app
+package interfaces
 
 import (
 	"github.com/urfave/cli/v2"
@@ -8,7 +8,7 @@ type ProductiveCLI struct {
 	app *cli.App
 }
 
-func NewProductiveCLI() *ProductiveCLI {
+func CLI() *ProductiveCLI {
 	return &ProductiveCLI{
 		app: createProductiveCliApp(),
 	}

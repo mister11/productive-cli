@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	model "github.com/mister11/productive-cli/internal/client/model"
+	model "github.com/mister11/productive-cli/internal/infrastructure/client/model"
 	mock "github.com/stretchr/testify/mock"
 )
 

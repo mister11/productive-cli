@@ -1,11 +1,13 @@
-package stdin
+package input
 
-import "github.com/mister11/productive-cli/internal/config"
+import (
+	"github.com/mister11/productive-cli/internal/domain/config"
+)
 
-type Stdin interface {
+type Prompt interface {
+	Input(label string) (string, error)
 	InputMasked(label string) string
-	Input(label string) string
-	InputMultiple(label string) []string
+	InputMultiline(label string) []string
 	SelectOne(label string, options []interface{}) interface{}
 	SelectOneWithSearch(label string, options []config.Project, searchFunction func(string, int) bool) interface{}
 }

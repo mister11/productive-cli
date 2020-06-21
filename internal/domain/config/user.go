@@ -1,6 +1,6 @@
 package config
 
-import "github.com/mister11/productive-cli/internal/client/model"
+import "github.com/mister11/productive-cli/internal/infrastructure/client/model"
 
 type Config struct {
 	UserID    string    `json:"user_id,omitempty"`
@@ -22,4 +22,14 @@ func NewProject(deal model.Deal, service model.Service) Project {
 		ServiceID:   service.ID,
 		ServiceName: service.Name,
 	}
+}
+
+type Manager interface {
+	GetToken() string
+	GetUserID() string
+	SaveToken(token string)
+	SaveUserID(userID string)
+	SaveProject(project Project)
+	GetSavedProjects() []Project
+	RemoveExistingProject(project Project)
 }

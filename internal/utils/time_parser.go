@@ -5,26 +5,23 @@ import (
 	"regexp"
 	"strconv"
 	"time"
-
-	"github.com/mister11/productive-cli/internal/log"
 )
 
 var timeRegex = regexp.MustCompile(`^(?:(\d+)[:])?(\d+)$`)
 
 // parses time of format HH:mm to minutes
 // needed for the Productive API which accepts minutes
-func ParseTime(time string) string {
+func ParseTime(time string) (string, error) {
 	matches := timeRegex.FindStringSubmatch(time)
 	if len(matches) != 3 {
-		log.Error("Wrong time format. You can enter either only minutes or HH:mm format", nil)
-		panic(errors.New("wrong time format"))
+		return "", errors.New("Wrong time format. You can enter either only minutes or HH:mm format")
 	}
 	hoursString := matches[1]
 	minutesString := matches[2]
 	if len(hoursString) == 0 {
-		return strconv.Itoa(getMinutes(minutesString))
+		return strconv.Itoa(getMinutes(minutesString)), nil
 	}
-	return strconv.Itoa(getHours(hoursString)*60 + getMinutes(minutesString))
+	return strconv.Itoa(getHours(hoursString)*60 + getMinutes(minutesString)), nil
 }
 
 func getHours(hoursString string) int {

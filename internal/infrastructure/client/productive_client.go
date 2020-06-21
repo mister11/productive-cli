@@ -3,14 +3,14 @@ package client
 import (
 	"bytes"
 	"fmt"
+	"github.com/mister11/productive-cli/internal/domain/config"
 	"net/url"
 	"reflect"
 	"time"
 
-	"github.com/mister11/productive-cli/internal/client/model"
-	"github.com/mister11/productive-cli/internal/config"
-	"github.com/mister11/productive-cli/internal/json"
-	"github.com/mister11/productive-cli/internal/log"
+	"github.com/mister11/productive-cli/internal/infrastructure/client/model"
+	"github.com/mister11/productive-cli/internal/infrastructure/json"
+	"github.com/mister11/productive-cli/internal/infrastructure/log"
 	"github.com/mister11/productive-cli/internal/utils"
 )
 
@@ -19,10 +19,10 @@ const orgID = "1"
 
 type ProductiveClient struct {
 	client        HttpClient
-	configManager config.ConfigManager
+	configManager config.Manager
 }
 
-func NewProductiveClient(configManager config.ConfigManager) *ProductiveClient {
+func NewProductiveClient(configManager config.Manager) *ProductiveClient {
 	client := &ProductiveClient{}
 	client.client = NewHttpClient(baseURL)
 	client.configManager = configManager
@@ -45,7 +45,8 @@ func (client *ProductiveClient) CreateProjectTimeEntry(
 	userID string,
 ) {
 	dayFormatted := utils.FormatDate(day)
-	timeEntry := model.NewTimeEntry(notes, duration, userID, service, dayFormatted)
+	durationFormatted, _ := utils.ParseTime(duration)
+	timeEntry := model.NewTimeEntry(notes, durationFormatted, userID, service, dayFormatted)
 	client.createTimeEntry(timeEntry)
 }
 
