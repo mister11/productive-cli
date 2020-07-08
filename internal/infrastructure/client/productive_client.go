@@ -22,7 +22,7 @@ type ProductiveClient struct {
 	configManager config.Manager
 }
 
-func NewProductiveClient(configManager config.Manager) *ProductiveClient {
+func NewProductiveClient(configManager config.Manager) TrackingClient {
 	client := &ProductiveClient{}
 	client.client = NewHttpClient(baseURL)
 	client.configManager = configManager

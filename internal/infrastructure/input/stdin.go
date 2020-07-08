@@ -14,7 +14,6 @@ func NewStdinPrompt() *StdinPrompt {
 	return &StdinPrompt{}
 }
 
-
 func (stdIn *StdinPrompt) Input(label string) (string, error) {
 	prompt := promptui.Prompt{
 		Label: color.MagentaString(label),
@@ -28,7 +27,7 @@ func (stdIn *StdinPrompt) Input(label string) (string, error) {
 	return result, nil
 }
 
-func (stdIn *StdinPrompt) InputMasked(label string) string {
+func (stdIn *StdinPrompt) InputMasked(label string) (string, error) {
 	prompt := promptui.Prompt{
 		Label: color.MagentaString(label),
 		Mask:  '*',
@@ -37,16 +36,19 @@ func (stdIn *StdinPrompt) InputMasked(label string) string {
 	result, err := prompt.Run()
 
 	if err != nil {
-		utils.ReportError("Error running prompt.", err)
+		return "", err
 	}
-	return result
+	return result, nil
 }
 
-func (stdIn *StdinPrompt) InputMultiple(label string) []string {
+func (stdIn *StdinPrompt) InputMultiline(label string) ([]string, error) {
 	index := 1
 	var inputs []string
 	for isEnd := false; !isEnd; {
-		input, _ := stdIn.Input(fmt.Sprintf("%s %d (empty to finish)", label, index))
+		input, err := stdIn.Input(fmt.Sprintf("%s %d (empty to finish)", label, index))
+		if err != nil {
+			return nil, err
+		}
 		if len(input) == 0 {
 			isEnd = true
 			continue
@@ -54,7 +56,7 @@ func (stdIn *StdinPrompt) InputMultiple(label string) []string {
 		inputs = append(inputs, input)
 		index++
 	}
-	return inputs
+	return inputs, nil
 }
 
 func (stdIn *StdinPrompt) SelectOne(label string, options []interface{}) interface{} {

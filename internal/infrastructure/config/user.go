@@ -48,17 +48,17 @@ func (fcm *FileConfigManager) GetSavedProjects() []config.Project {
 }
 
 func (fcm *FileConfigManager) RemoveExistingProject(project config.Project) {
-	config := loadConfig()
+	configuration := loadConfig()
 
 	var projects []config.Project
-	for _, savedProject := range config.Projects {
+	for _, savedProject := range configuration.Projects {
 		if !(savedProject.DealID == project.DealID && savedProject.ServiceID == project.ServiceID) {
 			projects = append(projects, savedProject)
 		}
 	}
 
-	config.Projects = projects
-	saveConfig(config)
+	configuration.Projects = projects
+	saveConfig(configuration)
 }
 
 func loadConfig() config.Config {

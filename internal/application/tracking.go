@@ -2,44 +2,82 @@ package application
 
 import (
 	"github.com/mister11/productive-cli/internal/domain/tracking"
-	"github.com/mister11/productive-cli/internal/infrastructure/input"
-	"time"
-
-	"github.com/mister11/productive-cli/internal/config"
-	"github.com/mister11/productive-cli/internal/domain/datetime"
 	"github.com/mister11/productive-cli/internal/infrastructure/client"
+	"github.com/mister11/productive-cli/internal/infrastructure/input"
+	"github.com/mister11/productive-cli/internal/infrastructure/log"
+
+	"github.com/mister11/productive-cli/internal/domain/datetime"
+	"github.com/mister11/productive-cli/internal/infrastructure/config"
 )
 
 type TrackingService struct {
-	foodTracker      tracking.FoodTracker
-	projectTracker   tracking.ProjectTracker
-	dateTimeProvider datetime.DateTimeProvider
+	foodEntriesCreator  tracking.FoodEntriesCreator
+	projectEntryCreator tracking.ProjectEntryCreator
+	trackingClient      client.TrackingClient
+	prompt              *input.StdinPrompt
 }
 
 func NewTrackingService() *TrackingService {
-	stdIn := input.NewStdinPrompt()
+	prompt := input.NewStdinPrompt()
 	configManager := config.NewFileConfigManager()
 	dateTimeProvider := datetime.NewRealTimeDateProvider()
-	productiveClient := client.NewProductiveClient(configManager)
+	trackingClient := client.NewProductiveClient(configManager)
+	searcher := tracking.NewProjectSearcher(prompt, trackingClient)
 
 	return &TrackingService{
-		foodTracker:      tracking.NewHTTPFoodTracker(productiveClient, configManager),
-		projectTracker:   tracking.NewHTTPProjectTracker(productiveClient, stdIn, configManager, dateTimeProvider),
-		dateTimeProvider: dateTimeProvider,
+		foodEntriesCreator:  tracking.NewFoodEntriesCreator(dateTimeProvider, configManager),
+		projectEntryCreator: tracking.NewProjectEntryCreator(dateTimeProvider, prompt, configManager, searcher),
+		trackingClient:      trackingClient,
+		prompt:              prompt,
 	}
 }
 
-func (service *TrackingService) TrackFood(trackFoodRequest tracking.TrackFoodRequest) {
-	service.foodTracker.TrackFood(trackFoodRequest)
+func (service *TrackingService) TrackFood(request tracking.TrackFoodRequest) error {
+	if err := service.loginIfNeeded(); err != nil {
+		return err
+	}
+	foodEntries, err := service.foodEntriesCreator.Create(request)
+	if err != nil {
+		return err
+	}
+	return service.trackingClient.TrackFood(foodEntries)
 }
 
-func (service *TrackingService) TrackProject(request tracking.TrackProjectRequest) {
-	var day time.Time
-	if request.Day != "" {
-		// this also verifies a format
-		day = service.dateTimeProvider.ToISOTime(request.Day)
-	} else {
-		day = service.dateTimeProvider.Now()
+func (service *TrackingService) TrackProject(request tracking.TrackProjectRequest) error {
+	if err := service.loginIfNeeded(); err != nil {
+		return err
 	}
-	service.projectTracker.TrackProject(day)
+	projectEntry, err := service.projectEntryCreator.Create(request)
+	if err != nil {
+		return nil
+	}
+	return service.trackingClient.TrackProject(projectEntry)
+	//var day time.Time
+	//if request.Day != "" {
+	//	// this also verifies a format
+	//	day = service.dateTimeProvider.ToISOTime(request.Day)
+	//} else {
+	//	day = service.dateTimeProvider.Now()
+	//}
+	//service.projectTracker.TrackProject(day)
+	//factory.config.SaveProject(config.NewProject(*deal, *service))
+}
+
+func (service *TrackingService) loginIfNeeded() error {
+	loginStatus, err := service.trackingClient.VerifyLogin()
+	if err != nil {
+		log.Error("Cannot verify login status. Please re-login.")
+	}
+	if loginStatus != "ok" {
+		username, err := service.prompt.Input("Username")
+		if err != nil {
+			return err
+		}
+		password, err := service.prompt.InputMasked("Password")
+		if err != nil {
+			return err
+		}
+		return service.trackingClient.Login(username, password)
+	}
+	return nil
 }

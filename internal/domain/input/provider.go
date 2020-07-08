@@ -6,8 +6,8 @@ import (
 
 type Prompt interface {
 	Input(label string) (string, error)
-	InputMasked(label string) string
-	InputMultiline(label string) []string
+	InputMasked(label string) (string, error)
+	InputMultiline(label string) ([]string, error)
 	SelectOne(label string, options []interface{}) interface{}
 	SelectOneWithSearch(label string, options []config.Project, searchFunction func(string, int) bool) interface{}
 }

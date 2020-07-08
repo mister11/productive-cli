@@ -1,53 +1,59 @@
 package tracking
 
 import (
-	config2 "github.com/mister11/productive-cli/internal/domain/config"
+	"errors"
+	"github.com/mister11/productive-cli/internal/domain/config"
 	"github.com/mister11/productive-cli/internal/domain/datetime"
-	"github.com/mister11/productive-cli/internal/infrastructure/client"
-	"github.com/mister11/productive-cli/internal/infrastructure/log"
 	"time"
 )
 
-type FoodTracker interface {
-	TrackFood(trackFoodRequest TrackFoodRequest)
+type FoodEntry struct {
+	day    time.Time
+	userID string
 }
 
-type httpFoodTracker struct {
-	client           client.TrackingClient
-	config           config2.Manager
+type FoodEntriesCreator interface {
+	Create(request TrackFoodRequest) ([]FoodEntry, error)
+}
+
+type foodEntriesFactory struct {
 	dateTimeProvider datetime.DateTimeProvider
+	config           config.Manager
 }
 
-func NewHTTPFoodTracker(
-	client client.TrackingClient,
-	config config2.Manager,
-	dateTimeProvider datetime.DateTimeProvider,
-) *httpFoodTracker {
-	return &httpFoodTracker{
-		client:           client,
-		config:           config,
-		dateTimeProvider: dateTimeProvider,
+func NewFoodEntriesCreator(
+	provider datetime.DateTimeProvider,
+	manager config.Manager,
+) FoodEntriesCreator {
+	return &foodEntriesFactory{
+		dateTimeProvider: provider,
+		config:           manager,
 	}
 }
 
-func (tracker *httpFoodTracker) TrackFood(trackFoodRequest TrackFoodRequest) {
+func (factory *foodEntriesFactory) Create(trackFoodRequest TrackFoodRequest) ([]FoodEntry, error) {
 	if !trackFoodRequest.IsValid() {
-		log.Error("You've provided both week and day tracking so I don't know what to do.", nil)
-		return
+		return nil, errors.New("invalid track food request")
 	}
-	days := tracker.getTrackingDays(trackFoodRequest)
-	userID := tracker.config.GetUserID()
+	days := factory.getTrackingDays(trackFoodRequest)
+	userID := factory.config.GetUserID()
+	var entries []FoodEntry
 	for _, day := range days {
-		tracker.client.CreateFoodTimeEntry(day, userID)
+		entry := FoodEntry{
+			day:    day,
+			userID: userID,
+		}
+		entries = append(entries, entry)
 	}
+	return entries, nil
 }
 
-func (tracker *httpFoodTracker) getTrackingDays(request TrackFoodRequest) []time.Time {
+func (factory *foodEntriesFactory) getTrackingDays(request TrackFoodRequest) []time.Time {
 	if request.IsWeekTracking {
-		return tracker.dateTimeProvider.GetWeekDays()
+		return factory.dateTimeProvider.GetWeekDays()
 	} else if request.Day != "" {
-		return []time.Time{tracker.dateTimeProvider.ToISOTime(request.Day)}
+		return []time.Time{factory.dateTimeProvider.ToISOTime(request.Day)}
 	} else {
-		return []time.Time{tracker.dateTimeProvider.Now()}
+		return []time.Time{factory.dateTimeProvider.Now()}
 	}
 }
