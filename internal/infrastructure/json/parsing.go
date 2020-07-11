@@ -25,10 +25,3 @@ func FromJsonMany(json io.Reader, t reflect.Type) ([]interface{}, error) {
 
 	return models, nil
 }
-
-func FromJsonOne(json io.Reader, model interface{}) error {
-	if err := jsonapi.UnmarshalPayload(json, model); err != nil {
-		return err
-	}
-	return nil
-}

@@ -2,15 +2,15 @@ package log
 
 import (
 	"fmt"
-	"github.com/fatih/color"
+	"github.com/logrusorgru/aurora"
 )
 
 func Debug(format string, args ...interface{}) {
-	color.White(format, args)
+	fmt.Println(aurora.White(fmt.Sprintf(format, args)))
 }
 
 func Info(format string, args ...interface{}) {
-	color.Magenta(format, args)
+	fmt.Println(aurora.Cyan(fmt.Sprintf(format, args)))
 }
 
 func Error(format string, err ...error) {

@@ -32,8 +32,11 @@ func (f FileUserSessionManager) GetUserSession() (*UserSessionData, error) {
 	if err != nil {
 		return nil, err
 	}
+	_, err = os.Stat(*sessionPath)
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
 	sessionJSON, err := utils.ReadFile(*sessionPath)
-
 	if err != nil {
 		return nil, err
 	}

@@ -12,14 +12,12 @@ func trackFood(context *cli.Context) error {
 		IsWeekTracking: context.Bool("w"),
 		Day:            context.String("d"),
 	}
-	application.NewTrackingService().TrackFood(trackFoodRequest)
-	return nil
+	return application.NewTrackingService().TrackFood(trackFoodRequest)
 }
 
 func trackProject(context *cli.Context) error {
 	trackProjectRequest := tracking2.TrackProjectRequest{
 		Day: context.String("d"),
 	}
-	application.NewTrackingService().TrackProject(trackProjectRequest)
-	return nil
+	return application.NewTrackingService().TrackProject(trackProjectRequest)
 }

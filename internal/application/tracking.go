@@ -5,7 +5,6 @@ import (
 	"github.com/mister11/productive-cli/internal/domain/tracking"
 	"github.com/mister11/productive-cli/internal/infrastructure/client"
 	"github.com/mister11/productive-cli/internal/infrastructure/input"
-	"github.com/mister11/productive-cli/internal/infrastructure/log"
 	"github.com/mister11/productive-cli/internal/infrastructure/session"
 
 	"github.com/mister11/productive-cli/internal/domain/datetime"
@@ -16,7 +15,7 @@ type TrackingService struct {
 	projectEntryCreator tracking.ProjectEntryCreator
 	trackingClient      tracking.TrackingClient
 	prompt              *input.StdinPrompt
-	loginManager        LoginManager
+	loginManager        domain.LoginManager
 }
 
 func NewTrackingService() *TrackingService {
@@ -61,7 +60,7 @@ func (service *TrackingService) TrackProject(request tracking.TrackProjectReques
 func (service *TrackingService) loginIfNeeded() error {
 	isSessionValid, err := service.loginManager.IsSessionValid()
 	if err != nil {
-		log.Error("Cannot verify login status. Please re-login.")
+		return err
 	}
 	// session is valid, we don't need login and there's no error
 	if isSessionValid {

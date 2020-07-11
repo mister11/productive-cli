@@ -9,7 +9,7 @@ type OrganizationMembershipData struct {
 	PersonID string
 }
 
-type SessionData struct {
-	PersonID string
-	Token    string
+type LoginManager interface {
+	IsSessionValid() (bool, error)
+	Login(username string, password string) error
 }

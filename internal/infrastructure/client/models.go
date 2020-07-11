@@ -6,8 +6,8 @@ type OrganizationMembership struct {
 }
 
 type Deal struct {
-	ID      string `jsonapi:"primary,deals"`
-	Name    string `jsonapi:"attr,name"`
+	ID   string `jsonapi:"primary,deals"`
+	Name string `jsonapi:"attr,name"`
 }
 
 type Service struct {
@@ -30,13 +30,14 @@ type TimeEntry struct {
 }
 
 type SessionRequest struct {
-	ID string `jsonapi:"primary,sessions"`
-	Email string `jsonapi:"attr,email"`
+	ID       string `jsonapi:"primary,sessions"`
+	Email    string `jsonapi:"attr,email"`
 	Password string `jsonapi:"attr,password"`
 }
+
 type SessionResponse struct {
-	ID string `jsonapi:"primary,sessions"`
-	Token string `jsonapi:"attr,token"`
+	ID                  string `jsonapi:"primary,sessions"`
+	Token               string `jsonapi:"attr,token"`
 	TokenExpirationDate string `jsonapi:"attr,token_expires_at"`
 }
 
