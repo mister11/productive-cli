@@ -6,23 +6,29 @@ import (
 	"reflect"
 
 	"github.com/google/jsonapi"
-	"github.com/mister11/productive-cli/internal/utils"
 )
 
-func ToJsonEmbedded(model interface{}) []byte {
+func ToJsonEmbedded(model interface{}) ([]byte, error) {
 	jsonBuffer := new(bytes.Buffer)
 	err := jsonapi.MarshalOnePayloadEmbedded(jsonBuffer, model)
 	if err != nil {
-		utils.ReportError("Marshaling of time entry payload failed.", err)
+		return nil, err
 	}
-	return jsonBuffer.Bytes()
+	return jsonBuffer.Bytes(), nil
 }
 
-func FromJsonMany(json io.Reader, t reflect.Type) []interface{} {
+func FromJsonMany(json io.Reader, t reflect.Type) ([]interface{}, error) {
 	models, err := jsonapi.UnmarshalManyPayload(json, t)
 	if err != nil {
-		utils.ReportError("Error parsing JSON response.", err)
+		return nil, err
 	}
 
-	return models
+	return models, nil
+}
+
+func FromJsonOne(json io.Reader, model interface{}) error {
+	if err := jsonapi.UnmarshalPayload(json, model); err != nil {
+		return err
+	}
+	return nil
 }

@@ -1,34 +1,38 @@
 package application
 
 import (
+	"github.com/mister11/productive-cli/internal/domain"
 	"github.com/mister11/productive-cli/internal/domain/tracking"
 	"github.com/mister11/productive-cli/internal/infrastructure/client"
 	"github.com/mister11/productive-cli/internal/infrastructure/input"
 	"github.com/mister11/productive-cli/internal/infrastructure/log"
+	"github.com/mister11/productive-cli/internal/infrastructure/session"
 
 	"github.com/mister11/productive-cli/internal/domain/datetime"
-	"github.com/mister11/productive-cli/internal/infrastructure/config"
 )
 
 type TrackingService struct {
 	foodEntriesCreator  tracking.FoodEntriesCreator
 	projectEntryCreator tracking.ProjectEntryCreator
-	trackingClient      client.TrackingClient
+	trackingClient      tracking.TrackingClient
 	prompt              *input.StdinPrompt
+	loginManager        LoginManager
 }
 
 func NewTrackingService() *TrackingService {
 	prompt := input.NewStdinPrompt()
-	configManager := config.NewFileConfigManager()
+	userConfigManager := client.NewFileUserSessionManager()
+	projectsConfigManager := domain.NewFileTrackedProjectsManager()
 	dateTimeProvider := datetime.NewRealTimeDateProvider()
-	trackingClient := client.NewProductiveClient(configManager)
-	searcher := tracking.NewProjectSearcher(prompt, trackingClient)
+	trackingClient := client.NewProductiveClient(userConfigManager, projectsConfigManager)
+	loginManager := session.NewProductiveLoginManager(trackingClient, userConfigManager)
 
 	return &TrackingService{
-		foodEntriesCreator:  tracking.NewFoodEntriesCreator(dateTimeProvider, configManager),
-		projectEntryCreator: tracking.NewProjectEntryCreator(dateTimeProvider, prompt, configManager, searcher),
+		foodEntriesCreator:  tracking.NewFoodEntriesCreator(dateTimeProvider),
+		projectEntryCreator: tracking.NewProjectEntryCreator(dateTimeProvider, prompt, projectsConfigManager, trackingClient),
 		trackingClient:      trackingClient,
 		prompt:              prompt,
+		loginManager:        loginManager,
 	}
 }
 
@@ -52,32 +56,24 @@ func (service *TrackingService) TrackProject(request tracking.TrackProjectReques
 		return nil
 	}
 	return service.trackingClient.TrackProject(projectEntry)
-	//var day time.Time
-	//if request.Day != "" {
-	//	// this also verifies a format
-	//	day = service.dateTimeProvider.ToISOTime(request.Day)
-	//} else {
-	//	day = service.dateTimeProvider.Now()
-	//}
-	//service.projectTracker.TrackProject(day)
-	//factory.config.SaveProject(config.NewProject(*deal, *service))
 }
 
 func (service *TrackingService) loginIfNeeded() error {
-	loginStatus, err := service.trackingClient.VerifyLogin()
+	isSessionValid, err := service.loginManager.IsSessionValid()
 	if err != nil {
 		log.Error("Cannot verify login status. Please re-login.")
 	}
-	if loginStatus != "ok" {
-		username, err := service.prompt.Input("Username")
-		if err != nil {
-			return err
-		}
-		password, err := service.prompt.InputMasked("Password")
-		if err != nil {
-			return err
-		}
-		return service.trackingClient.Login(username, password)
+	// session is valid, we don't need login and there's no error
+	if isSessionValid {
+		return nil
 	}
-	return nil
+	username, err := service.prompt.Input("Username")
+	if err != nil {
+		return err
+	}
+	password, err := service.prompt.InputMasked("Password")
+	if err != nil {
+		return err
+	}
+	return service.loginManager.Login(username, password)
 }

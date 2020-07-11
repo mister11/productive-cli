@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
-	"github.com/mister11/productive-cli/internal/domain/config"
-	"github.com/mister11/productive-cli/internal/utils"
+	"github.com/mister11/productive-cli/internal/domain"
 )
 
 type StdinPrompt struct{}
@@ -59,7 +58,7 @@ func (stdIn *StdinPrompt) InputMultiline(label string) ([]string, error) {
 	return inputs, nil
 }
 
-func (stdIn *StdinPrompt) SelectOne(label string, options []interface{}) interface{} {
+func (stdIn *StdinPrompt) SelectOne(label string, options []interface{}) (interface{}, error) {
 	prompt := promptui.Select{
 		Label: label,
 		Items: options,
@@ -73,13 +72,17 @@ func (stdIn *StdinPrompt) SelectOne(label string, options []interface{}) interfa
 	index, _, err := prompt.Run()
 
 	if err != nil {
-		utils.ReportError("Input failed", err)
+		return nil, err
 	}
 
-	return options[index]
+	return options[index], nil
 }
 
-func (stdIn *StdinPrompt) SelectOneWithSearch(label string, options []config.Project, searchFunction func(string, int) bool) interface{} {
+func (stdIn *StdinPrompt) SelectOneWithSearch(
+	label string,
+	options []domain.TrackedProject,
+	searchFunction func(string, int) bool,
+) interface{} {
 	prompt := promptui.Select{
 		Label: label,
 		Items: options,

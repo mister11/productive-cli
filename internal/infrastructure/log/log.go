@@ -5,8 +5,8 @@ import (
 	"github.com/fatih/color"
 )
 
-func Debug(message interface{}) {
-	color.White("%s", message)
+func Debug(format string, args ...interface{}) {
+	color.White(format, args)
 }
 
 func Info(format string, args ...interface{}) {

@@ -2,23 +2,21 @@ package tracking
 
 import (
 	"errors"
-	"github.com/mister11/productive-cli/internal/domain/config"
+	"github.com/mister11/productive-cli/internal/domain"
 	"github.com/mister11/productive-cli/internal/domain/input"
 	"strings"
 	"time"
 
 	"github.com/mister11/productive-cli/internal/domain/datetime"
-	"github.com/mister11/productive-cli/internal/infrastructure/client/model"
 	"github.com/mister11/productive-cli/internal/infrastructure/log"
 	"github.com/mister11/productive-cli/internal/utils"
 )
 
 type ProjectEntry struct {
-	service  *model.Service
-	day      time.Time
-	duration string
-	notes    []string
-	userID   string
+	Service  *domain.Service
+	Day      time.Time
+	Duration string
+	Notes    []string
 }
 
 type ProjectEntryCreator interface {
@@ -26,23 +24,23 @@ type ProjectEntryCreator interface {
 }
 
 type projectEntryFactory struct {
-	dateTimeProvider datetime.DateTimeProvider
-	prompt           input.Prompt
-	config           config.Manager
-	searcher         Searcher
+	dateTimeProvider     datetime.DateTimeProvider
+	prompt               input.Prompt
+	projectConfigManager domain.TrackedProjectManager
+	trackingClient       TrackingClient
 }
 
 func NewProjectEntryCreator(
 	dateTimeProvider datetime.DateTimeProvider,
 	prompt input.Prompt,
-	config config.Manager,
-	searcher Searcher,
+	projectConfigManager domain.TrackedProjectManager,
+	trackingClient TrackingClient,
 ) ProjectEntryCreator {
 	return &projectEntryFactory{
-		dateTimeProvider: dateTimeProvider,
-		prompt:           prompt,
-		config:           config,
-		searcher:         searcher,
+		dateTimeProvider:     dateTimeProvider,
+		prompt:               prompt,
+		projectConfigManager: projectConfigManager,
+		trackingClient:       trackingClient,
 	}
 }
 
@@ -50,7 +48,7 @@ func (factory *projectEntryFactory) Create(request TrackProjectRequest) (*Projec
 	day := factory.dateTimeProvider.ToISOTime(request.Day)
 	existingProject := factory.selectExistingProject()
 	if existingProject != nil {
-		project := existingProject.(config.Project)
+		project := existingProject.(domain.TrackedProject)
 		return factory.getSavedProject(day, project)
 	} else {
 		return factory.getNewProject(day)
@@ -58,36 +56,58 @@ func (factory *projectEntryFactory) Create(request TrackProjectRequest) (*Projec
 }
 
 func (factory *projectEntryFactory) getNewProject(day time.Time) (*ProjectEntry, error) {
-	deal, err := factory.findAndSelectProject(day)
+	projectQuery, err := factory.prompt.Input("Enter project name")
 	if err != nil {
 		return nil, err
 	}
-	service, err := factory.findAndSelectService(day, deal)
+	deals, err := factory.trackingClient.SearchDeals(projectQuery, day)
+	if err != nil {
+		return nil, err
+	}
+	deal, err := factory.prompt.SelectOne("Select project", deals)
+	if err != nil {
+		return nil, err
+	}
+	service, err := factory.findAndSelectService(day, deal.(*domain.Deal))
 	if err != nil {
 		return nil, err
 	}
 	return factory.createProjectEntry(service, day)
 }
 
-func (factory *projectEntryFactory) findAndSelectProject(day time.Time) (*model.Deal, error) {
-	project, err := factory.searcher.SearchProjects(day)
+func (factory *projectEntryFactory) findAndSelectProject(day time.Time) (*domain.Deal, error) {
+	dealQuery, err := factory.prompt.Input("Enter deal name")
 	if err != nil {
-		log.Error("Project search failed. Please try again.")
 		return nil, err
 	}
-	return project, nil
-}
-
-func (factory *projectEntryFactory) findAndSelectService(day time.Time, deal *model.Deal) (*model.Service, error) {
-	service, err := factory.searcher.SearchServices(day, deal)
+	deals, err := factory.trackingClient.SearchDeals(dealQuery, day)
 	if err != nil {
-		log.Error("Service search failed. Please try again.")
 		return nil, err
 	}
-	return service, nil
+	deal, err := factory.prompt.SelectOne("Select project", deals)
+	if err != nil {
+		return nil, err
+	}
+	return deal.(*domain.Deal), nil
 }
 
-func (factory *projectEntryFactory) createProjectEntry(service *model.Service, day time.Time) (*ProjectEntry, error) {
+func (factory *projectEntryFactory) findAndSelectService(day time.Time, deal *domain.Deal) (*domain.Service, error) {
+	serviceQuery, err := factory.prompt.Input("Enter service name")
+	if err != nil {
+		return nil, err
+	}
+	services, err := factory.trackingClient.SearchServices(serviceQuery, deal.ID, day)
+	if err != nil {
+		return nil, err
+	}
+	service, err := factory.prompt.SelectOne("Select service", services)
+	if err != nil {
+		return nil, err
+	}
+	return service.(*domain.Service), nil
+}
+
+func (factory *projectEntryFactory) createProjectEntry(service *domain.Service, day time.Time) (*ProjectEntry, error) {
 	duration, err := factory.prompt.Input("Time")
 	if err != nil {
 		log.Error("Duration input prompt failed. Please try again.")
@@ -101,28 +121,35 @@ func (factory *projectEntryFactory) createProjectEntry(service *model.Service, d
 	if err != nil {
 		return nil, err
 	}
-	//notesFormatted := createNotes(notes)
 	projectEntry := &ProjectEntry{
-		service:  service,
-		day:      day,
-		duration: duration,
-		notes:    notes,
-		userID:   factory.config.GetUserID(),
+		Service:  service,
+		Day:      day,
+		Duration: duration,
+		Notes:    notes,
 	}
 	return projectEntry, nil
 }
 
-func (factory *projectEntryFactory) getSavedProject(day time.Time, project config.Project) (*ProjectEntry, error) {
-	factory.config.RemoveExistingProject(project)
-	service, err := factory.searcher.SearchService(project.ServiceName, project.DealID, day)
+func (factory *projectEntryFactory) getSavedProject(day time.Time, project domain.TrackedProject) (*ProjectEntry, error) {
+	if err := factory.projectConfigManager.RemoveTrackedProject(project); err != nil {
+		return nil, err
+	}
+	services, err := factory.trackingClient.SearchServices(project.ServiceName, project.DealID, day)
 	if err != nil {
 		return nil, err
 	}
+	if len(services) != 1 {
+		return nil, errors.New("multiple service return when 1 expected")
+	}
+	service := services[0].(*domain.Service)
 	return factory.createProjectEntry(service, day)
 }
 
 func (factory *projectEntryFactory) selectExistingProject() interface{} {
-	savedProjects := factory.config.GetSavedProjects()
+	savedProjects, err := factory.projectConfigManager.GetTrackedProjects()
+	if err != nil {
+		return nil
+	}
 	if len(savedProjects) == 0 {
 		return nil
 	}
@@ -134,7 +161,7 @@ func (factory *projectEntryFactory) selectExistingProject() interface{} {
 	return selectedProject
 }
 
-func searchProjectFunction(projects []config.Project) func(string, int) bool {
+func searchProjectFunction(projects []domain.TrackedProject) func(string, int) bool {
 	return func(query string, index int) bool {
 		project := projects[index]
 		return strings.Contains(project.DealName, query) || strings.Contains(project.ServiceName, query)
@@ -147,17 +174,4 @@ func validateDurationFormat(duration string) error {
 		return errors.New("time format error (only minutes or HH:mm allowed)")
 	}
 	return nil
-}
-
-func createNotes(notes []string) string {
-	if len(notes) == 0 {
-		return ""
-	}
-	var notesHTML strings.Builder
-	notesHTML.WriteString("<ul>")
-	for _, note := range notes {
-		notesHTML.WriteString("<li>" + note + "</li>")
-	}
-	notesHTML.WriteString("</ul>")
-	return notesHTML.String()
 }

@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	model "github.com/mister11/productive-cli/internal/infrastructure/client/model"
+	"github.com/mister11/productive-cli/internal/infrastructure/client"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -13,20 +13,20 @@ type TrackingClient struct {
 }
 
 // CreateTimeEntry provides a mock function with given fields: timeEntry
-func (_m *TrackingClient) CreateTimeEntry(timeEntry *model.TimeEntry) {
+func (_m *TrackingClient) CreateTimeEntry(timeEntry *client.TimeEntry) {
 	_m.Called(timeEntry)
 }
 
 // GetOrganizationMembership provides a mock function with given fields:
-func (_m *TrackingClient) GetOrganizationMembership() []model.OrganizationMembership {
+func (_m *TrackingClient) GetOrganizationMembership() []client.OrganizationMembership {
 	ret := _m.Called()
 
-	var r0 []model.OrganizationMembership
-	if rf, ok := ret.Get(0).(func() []model.OrganizationMembership); ok {
+	var r0 []client.OrganizationMembership
+	if rf, ok := ret.Get(0).(func() []client.OrganizationMembership); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]model.OrganizationMembership)
+			r0 = ret.Get(0).([]client.OrganizationMembership)
 		}
 	}
 

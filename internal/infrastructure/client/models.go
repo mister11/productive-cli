@@ -1,4 +1,4 @@
-package model
+package client
 
 type OrganizationMembership struct {
 	ID   string  `jsonapi:"primary,organization_memberships"`
@@ -8,12 +8,16 @@ type OrganizationMembership struct {
 type Deal struct {
 	ID      string `jsonapi:"primary,deals"`
 	Name    string `jsonapi:"attr,name"`
-	EndDate string `jsonapi:"attr,end_date"`
 }
 
 type Service struct {
 	ID   string `jsonapi:"primary,services"`
 	Name string `jsonapi:"attr,name"`
+}
+
+type Project struct {
+	deal    *Deal
+	service *Service
 }
 
 type TimeEntry struct {
@@ -23,6 +27,17 @@ type TimeEntry struct {
 	Time   string   `jsonapi:"attr,time"`
 	User   *Person  `jsonapi:"relation,person"`
 	Budget *Service `jsonapi:"relation,service"`
+}
+
+type SessionRequest struct {
+	ID string `jsonapi:"primary,sessions"`
+	Email string `jsonapi:"attr,email"`
+	Password string `jsonapi:"attr,password"`
+}
+type SessionResponse struct {
+	ID string `jsonapi:"primary,sessions"`
+	Token string `jsonapi:"attr,token"`
+	TokenExpirationDate string `jsonapi:"attr,token_expires_at"`
 }
 
 func NewTimeEntry(notes string, duration string, userID string, service *Service, day string) *TimeEntry {

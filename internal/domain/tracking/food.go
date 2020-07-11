@@ -2,14 +2,12 @@ package tracking
 
 import (
 	"errors"
-	"github.com/mister11/productive-cli/internal/domain/config"
 	"github.com/mister11/productive-cli/internal/domain/datetime"
 	"time"
 )
 
 type FoodEntry struct {
-	day    time.Time
-	userID string
+	Day time.Time
 }
 
 type FoodEntriesCreator interface {
@@ -17,18 +15,11 @@ type FoodEntriesCreator interface {
 }
 
 type foodEntriesFactory struct {
-	dateTimeProvider datetime.DateTimeProvider
-	config           config.Manager
+	dateTimeProvider  datetime.DateTimeProvider
 }
 
-func NewFoodEntriesCreator(
-	provider datetime.DateTimeProvider,
-	manager config.Manager,
-) FoodEntriesCreator {
-	return &foodEntriesFactory{
-		dateTimeProvider: provider,
-		config:           manager,
-	}
+func NewFoodEntriesCreator(provider datetime.DateTimeProvider) FoodEntriesCreator {
+	return &foodEntriesFactory{dateTimeProvider:  provider}
 }
 
 func (factory *foodEntriesFactory) Create(trackFoodRequest TrackFoodRequest) ([]FoodEntry, error) {
@@ -36,13 +27,9 @@ func (factory *foodEntriesFactory) Create(trackFoodRequest TrackFoodRequest) ([]
 		return nil, errors.New("invalid track food request")
 	}
 	days := factory.getTrackingDays(trackFoodRequest)
-	userID := factory.config.GetUserID()
 	var entries []FoodEntry
 	for _, day := range days {
-		entry := FoodEntry{
-			day:    day,
-			userID: userID,
-		}
+		entry := FoodEntry{Day: day}
 		entries = append(entries, entry)
 	}
 	return entries, nil
