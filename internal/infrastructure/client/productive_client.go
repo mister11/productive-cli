@@ -22,17 +22,14 @@ const orgID = "1"
 type HttpProductiveClient struct {
 	client                HttpClient
 	userConfigManager     UserSessionManager
-	projectsConfigManager domain.TrackedProjectManager
 }
 
 func NewProductiveClient(
 	userConfigManager UserSessionManager,
-	projectsConfigManager domain.TrackedProjectManager,
 ) *HttpProductiveClient {
 	client := &HttpProductiveClient{
 		client:                NewHttpClient(baseURL),
 		userConfigManager:     userConfigManager,
-		projectsConfigManager: projectsConfigManager,
 	}
 	return client
 }

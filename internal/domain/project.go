@@ -22,9 +22,8 @@ type TrackedProject struct {
 }
 
 type TrackedProjectManager interface {
-	SaveTrackedProject(project TrackedProject) error
+	UpsertTrackedProject(project TrackedProject) error
 	GetTrackedProjects() ([]TrackedProject, error)
-	RemoveTrackedProject(project TrackedProject) error
 }
 
 type FileTrackedProjectsManager struct{}
@@ -33,10 +32,13 @@ func NewFileTrackedProjectsManager() *FileTrackedProjectsManager {
 	return &FileTrackedProjectsManager{}
 }
 
-func (f FileTrackedProjectsManager) SaveTrackedProject(project TrackedProject) error {
+func (f FileTrackedProjectsManager) UpsertTrackedProject(project TrackedProject) error {
 	projects, err := f.GetTrackedProjects()
 	if err != nil {
 		return err
+	}
+	if projectExists(projects, project) {
+		return nil
 	}
 	projects = append(projects, project)
 	projectsConfigJSON, err := json.Marshal(TrackedProjects{
@@ -57,6 +59,10 @@ func (f FileTrackedProjectsManager) GetTrackedProjects() ([]TrackedProject, erro
 	if err != nil {
 		return nil, err
 	}
+	_, err = os.Stat(*configPath)
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
 	projectsJSON, err := utils.ReadFile(*configPath)
 
 	if err != nil {
@@ -70,29 +76,16 @@ func (f FileTrackedProjectsManager) GetTrackedProjects() ([]TrackedProject, erro
 	return projectsConfig.Projects, nil
 }
 
-func (f FileTrackedProjectsManager) RemoveTrackedProject(project TrackedProject) error {
-	savedProjects, err := f.GetTrackedProjects()
-	if err != nil {
-		return err
-	}
-
-	var newProjects []TrackedProject
-	for _, savedProject := range savedProjects {
-		if !(savedProject.DealID == project.DealID && savedProject.ServiceID == project.ServiceID) {
-			newProjects = append(newProjects, savedProject)
+func projectExists(
+	projects []TrackedProject,
+	project TrackedProject,
+) bool {
+	for _, savedProject := range projects {
+		if savedProject.DealID == project.DealID && savedProject.ServiceID == project.ServiceID {
+			return true
 		}
 	}
-	projectsConfigJSON, err := json.Marshal(TrackedProjects{
-		Projects: newProjects,
-	})
-	if err != nil {
-		return err
-	}
-	projectsConfigPath, err := getProjectConfigPath()
-	if err != nil {
-		return err
-	}
-	return utils.WriteFile(*projectsConfigPath, projectsConfigJSON)
+	return false
 }
 
 func getProjectConfigPath() (*string, error) {

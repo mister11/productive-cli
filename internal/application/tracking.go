@@ -11,27 +11,29 @@ import (
 )
 
 type TrackingService struct {
-	foodEntriesCreator  tracking.FoodEntriesCreator
-	projectEntryCreator tracking.ProjectEntryCreator
-	trackingClient      tracking.TrackingClient
-	prompt              *input.StdinPrompt
-	loginManager        domain.LoginManager
+	foodEntriesCreator    tracking.FoodEntriesCreator
+	projectEntryCreator   tracking.ProjectEntryCreator
+	trackedProjectManager domain.TrackedProjectManager
+	trackingClient        tracking.TrackingClient
+	prompt                *input.StdinPrompt
+	loginManager          domain.LoginManager
 }
 
 func NewTrackingService() *TrackingService {
 	prompt := input.NewStdinPrompt()
 	userConfigManager := client.NewFileUserSessionManager()
-	projectsConfigManager := domain.NewFileTrackedProjectsManager()
+	trackedProjectManager := domain.NewFileTrackedProjectsManager()
 	dateTimeProvider := datetime.NewRealTimeDateProvider()
-	trackingClient := client.NewProductiveClient(userConfigManager, projectsConfigManager)
+	trackingClient := client.NewProductiveClient(userConfigManager)
 	loginManager := session.NewProductiveLoginManager(trackingClient, userConfigManager)
 
 	return &TrackingService{
-		foodEntriesCreator:  tracking.NewFoodEntriesCreator(dateTimeProvider),
-		projectEntryCreator: tracking.NewProjectEntryCreator(dateTimeProvider, prompt, projectsConfigManager, trackingClient),
-		trackingClient:      trackingClient,
-		prompt:              prompt,
-		loginManager:        loginManager,
+		foodEntriesCreator:    tracking.NewFoodEntriesCreator(dateTimeProvider),
+		projectEntryCreator:   tracking.NewProjectEntryCreator(dateTimeProvider, prompt, trackedProjectManager, trackingClient),
+		trackedProjectManager: trackedProjectManager,
+		trackingClient:        trackingClient,
+		prompt:                prompt,
+		loginManager:          loginManager,
 	}
 }
 
@@ -54,7 +56,15 @@ func (service *TrackingService) TrackProject(request tracking.TrackProjectReques
 	if err != nil {
 		return nil
 	}
-	return service.trackingClient.TrackProject(projectEntry)
+	if err := service.trackingClient.TrackProject(projectEntry); err != nil {
+		return err
+	}
+	return service.trackedProjectManager.UpsertTrackedProject(domain.TrackedProject{
+		DealID:      projectEntry.Deal.ID,
+		DealName:    projectEntry.Deal.Name,
+		ServiceID:   projectEntry.Service.ID,
+		ServiceName: projectEntry.Service.Name,
+	})
 }
 
 func (service *TrackingService) loginIfNeeded() error {

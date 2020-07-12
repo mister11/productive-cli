@@ -14,6 +14,7 @@ import (
 
 type ProjectEntry struct {
 	Service  *domain.Service
+	Deal     *domain.Deal
 	Day      time.Time
 	Duration string
 	Notes    []string
@@ -72,7 +73,7 @@ func (factory *projectEntryFactory) getNewProject(day time.Time) (*ProjectEntry,
 	if err != nil {
 		return nil, err
 	}
-	return factory.createProjectEntry(service, day)
+	return factory.createProjectEntry(deal.(*domain.Deal), service, day)
 }
 
 func (factory *projectEntryFactory) findAndSelectProject(day time.Time) (*domain.Deal, error) {
@@ -107,7 +108,7 @@ func (factory *projectEntryFactory) findAndSelectService(day time.Time, deal *do
 	return service.(*domain.Service), nil
 }
 
-func (factory *projectEntryFactory) createProjectEntry(service *domain.Service, day time.Time) (*ProjectEntry, error) {
+func (factory *projectEntryFactory) createProjectEntry(deal *domain.Deal, service *domain.Service, day time.Time) (*ProjectEntry, error) {
 	duration, err := factory.prompt.Input("Time")
 	if err != nil {
 		log.Error("Duration input prompt failed. Please try again.")
@@ -123,6 +124,7 @@ func (factory *projectEntryFactory) createProjectEntry(service *domain.Service, 
 	}
 	projectEntry := &ProjectEntry{
 		Service:  service,
+		Deal:     deal,
 		Day:      day,
 		Duration: duration,
 		Notes:    notes,
@@ -131,9 +133,6 @@ func (factory *projectEntryFactory) createProjectEntry(service *domain.Service, 
 }
 
 func (factory *projectEntryFactory) getSavedProject(day time.Time, project domain.TrackedProject) (*ProjectEntry, error) {
-	if err := factory.projectConfigManager.RemoveTrackedProject(project); err != nil {
-		return nil, err
-	}
 	services, err := factory.trackingClient.SearchServices(project.ServiceName, project.DealID, day)
 	if err != nil {
 		return nil, err
@@ -142,7 +141,7 @@ func (factory *projectEntryFactory) getSavedProject(day time.Time, project domai
 		return nil, errors.New("multiple service return when 1 expected")
 	}
 	service := services[0].(*domain.Service)
-	return factory.createProjectEntry(service, day)
+	return factory.createProjectEntry(nil, service, day)
 }
 
 func (factory *projectEntryFactory) selectExistingProject() interface{} {
