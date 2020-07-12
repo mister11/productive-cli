@@ -54,7 +54,7 @@ func (service *TrackingService) TrackProject(request tracking.TrackProjectReques
 	}
 	projectEntry, err := service.projectEntryCreator.Create(request)
 	if err != nil {
-		return nil
+		return err
 	}
 	if err := service.trackingClient.TrackProject(projectEntry); err != nil {
 		return err

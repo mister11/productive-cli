@@ -50,7 +50,11 @@ func (factory *projectEntryFactory) Create(request TrackProjectRequest) (*Projec
 	existingProject := factory.selectExistingProject()
 	if existingProject != nil {
 		project := existingProject.(domain.TrackedProject)
-		return factory.getSavedProject(day, project)
+		projectEntry, err := factory.getSavedProject(day, project)
+		if projectEntry == nil {
+			return factory.getNewProject(day)
+		}
+		return projectEntry, err
 	} else {
 		return factory.getNewProject(day)
 	}
@@ -137,11 +141,23 @@ func (factory *projectEntryFactory) getSavedProject(day time.Time, project domai
 	if err != nil {
 		return nil, err
 	}
-	if len(services) != 1 {
-		return nil, errors.New("multiple service return when 1 expected")
+	// sometimes, Productive will return multiple matches even if there's a exact match
+	// so, we try and find exact match
+	var exactMatchService *domain.Service
+	for _, service := range services {
+		if service.(*domain.Service).Name == project.ServiceName {
+			exactMatchService = service.(*domain.Service)
+		}
 	}
-	service := services[0].(*domain.Service)
-	return factory.createProjectEntry(nil, service, day)
+	if exactMatchService == nil {
+		log.Info("Cannot find exact match of saved service. Falling back to global search.")
+		return nil, nil
+	}
+	deal := &domain.Deal{
+		ID:   project.DealID,
+		Name: project.DealName,
+	}
+	return factory.createProjectEntry(deal, exactMatchService, day)
 }
 
 func (factory *projectEntryFactory) selectExistingProject() interface{} {
