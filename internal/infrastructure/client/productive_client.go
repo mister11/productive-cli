@@ -142,7 +142,14 @@ func (client *HttpProductiveClient) SearchDeals(query string, day time.Time) ([]
 	}
 
 	var deals []interface{}
-	deals = append(deals, dealInterfaces...)
+	for _, dealInterface := range dealInterfaces {
+		apiDeal := dealInterface.(*Deal)
+		deal := &domain.Deal{
+			ID:   apiDeal.ID,
+			Name: apiDeal.Name,
+		}
+		deals = append(deals, deal)
+	}
 
 	return deals, nil
 }
@@ -165,7 +172,14 @@ func (client *HttpProductiveClient) SearchServices(query string, dealID string, 
 	}
 
 	var services []interface{}
-	services = append(services, serviceInterfaces...)
+	for _, serviceInterface := range serviceInterfaces {
+		apiService := serviceInterface.(*Service)
+		service := &domain.Service{
+			ID:   apiService.ID,
+			Name: apiService.Name,
+		}
+		services = append(services, service)
+	}
 
 	return services, nil
 }
