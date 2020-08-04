@@ -2,6 +2,7 @@ package application
 
 import (
 	"github.com/mister11/productive-cli/internal/domain"
+	input2 "github.com/mister11/productive-cli/internal/domain/input"
 	"github.com/mister11/productive-cli/internal/domain/tracking"
 	"github.com/mister11/productive-cli/internal/infrastructure/client"
 	"github.com/mister11/productive-cli/internal/infrastructure/input"
@@ -15,7 +16,7 @@ type TrackingService struct {
 	projectEntryCreator   tracking.ProjectEntryCreator
 	trackedProjectManager domain.TrackedProjectManager
 	trackingClient        tracking.TrackingClient
-	prompt                *input.StdinPrompt
+	prompt                input2.Prompt
 	loginManager          domain.LoginManager
 }
 
@@ -29,7 +30,7 @@ func NewTrackingService() *TrackingService {
 
 	return &TrackingService{
 		foodEntriesCreator:    tracking.NewFoodEntriesCreator(dateTimeProvider),
-		projectEntryCreator:   tracking.NewProjectEntryCreator(dateTimeProvider, prompt, trackedProjectManager, trackingClient),
+		projectEntryCreator:   tracking.NewProjectEntryCreator(dateTimeProvider, &prompt, trackedProjectManager, trackingClient),
 		trackedProjectManager: trackedProjectManager,
 		trackingClient:        trackingClient,
 		prompt:                prompt,

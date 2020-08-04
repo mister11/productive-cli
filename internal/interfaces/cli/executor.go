@@ -1,4 +1,4 @@
-package interfaces
+package cli
 
 import (
 	"github.com/mister11/productive-cli/internal/application"

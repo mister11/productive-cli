@@ -9,11 +9,11 @@ import (
 
 type StdinPrompt struct{}
 
-func NewStdinPrompt() *StdinPrompt {
-	return &StdinPrompt{}
+func NewStdinPrompt() StdinPrompt {
+	return StdinPrompt{}
 }
 
-func (stdIn *StdinPrompt) Input(label string) (string, error) {
+func (stdIn StdinPrompt) Input(label string) (string, error) {
 	prompt := promptui.Prompt{
 		Label: color.MagentaString(label),
 	}
@@ -26,7 +26,7 @@ func (stdIn *StdinPrompt) Input(label string) (string, error) {
 	return result, nil
 }
 
-func (stdIn *StdinPrompt) InputMasked(label string) (string, error) {
+func (stdIn StdinPrompt) InputMasked(label string) (string, error) {
 	prompt := promptui.Prompt{
 		Label: color.MagentaString(label),
 		Mask:  '*',
@@ -40,7 +40,7 @@ func (stdIn *StdinPrompt) InputMasked(label string) (string, error) {
 	return result, nil
 }
 
-func (stdIn *StdinPrompt) InputMultiline(label string) ([]string, error) {
+func (stdIn StdinPrompt) InputMultiline(label string) ([]string, error) {
 	index := 1
 	var inputs []string
 	for isEnd := false; !isEnd; {
@@ -58,7 +58,7 @@ func (stdIn *StdinPrompt) InputMultiline(label string) ([]string, error) {
 	return inputs, nil
 }
 
-func (stdIn *StdinPrompt) SelectOne(label string, options []interface{}) (interface{}, error) {
+func (stdIn StdinPrompt) SelectOne(label string, options []interface{}) (interface{}, error) {
 	prompt := promptui.Select{
 		Label: label,
 		Items: options,
@@ -78,7 +78,7 @@ func (stdIn *StdinPrompt) SelectOne(label string, options []interface{}) (interf
 	return options[index], nil
 }
 
-func (stdIn *StdinPrompt) SelectOneWithSearch(
+func (stdIn StdinPrompt) SelectOneWithSearch(
 	label string,
 	options []domain.TrackedProject,
 	searchFunction func(string, int) bool,

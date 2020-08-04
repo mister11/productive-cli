@@ -1,21 +1,11 @@
-package interfaces
+package cli
 
 import (
 	"github.com/urfave/cli/v2"
 )
 
-type ProductiveCLI struct {
-	app *cli.App
-}
-
-func CLI() *ProductiveCLI {
-	return &ProductiveCLI{
-		app: createProductiveCliApp(),
-	}
-}
-
-func (cli *ProductiveCLI) Run(args[] string) error {
-	return cli.app.Run(args)
+func Run(args[] string) error {
+	return createProductiveCliApp().Run(args)
 }
 
 func createProductiveCliApp() *cli.App {
