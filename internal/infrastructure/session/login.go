@@ -2,6 +2,8 @@ package session
 
 import (
 	"errors"
+	"fmt"
+	"github.com/mister11/productive-cli/internal/domain"
 	"github.com/mister11/productive-cli/internal/domain/tracking"
 	"github.com/mister11/productive-cli/internal/infrastructure/client"
 	"github.com/mister11/productive-cli/internal/infrastructure/log"
@@ -25,6 +27,7 @@ func NewProductiveLoginManager(
 
 func (p HttpLoginManager) IsSessionValid() (bool, error) {
 	userSession, err := p.sessionManager.GetUserSession()
+	fmt.Println(userSession)
 	if err != nil {
 		return false, err
 	}
@@ -46,36 +49,50 @@ func (p HttpLoginManager) Login(username string, password string) error {
 	if err != nil {
 		return err
 	}
-	userSession, err := p.sessionManager.GetUserSession()
+	currentUserSession, err := p.sessionManager.GetUserSession()
 	if err != nil {
 		return err
 	}
-	if userSession != nil {
-		return nil
+	var personID string
+	if isFirstLogin(currentUserSession) {
+		personID, err = p.handleFirstLogin(loginData)
+		if err != nil {
+			return err
+		}
+	} else {
+		personID = currentUserSession.PersonID
 	}
-	userSession = &client.UserSessionData{
-		Token: loginData.Token,
+	userSession := &client.UserSessionData{
+		Token:               loginData.Token,
 		TokenExpirationDate: loginData.TokenExpirationDate,
-	}
-	if err := p.sessionManager.SaveUserSession(*userSession); err != nil {
-		return err
-	}
-	log.Info("First login. Setting up necessary tracking data.")
-	organizationMemberships, err := p.trackingClient.GetOrganizationMemberships()
-	if len(organizationMemberships) == 0 {
-		return errors.New("no organization memberships found")
-	}
-	if len(organizationMemberships) > 1 {
-		log.Info("Multiple organizations found. This is not currently supported. Taking the first one.")
-	}
-	personID := organizationMemberships[0].PersonID
-	userSession = &client.UserSessionData{
-		Token: loginData.Token,
-		TokenExpirationDate: loginData.TokenExpirationDate,
-		PersonID: personID,
+		PersonID:            personID,
 	}
 	if err := p.sessionManager.SaveUserSession(*userSession); err != nil {
 		return err
 	}
 	return nil
+}
+
+func isFirstLogin(currentUserSession *client.UserSessionData) bool {
+	return currentUserSession == nil || currentUserSession.PersonID == ""
+}
+
+func (p HttpLoginManager) handleFirstLogin(loginData *domain.LoginData) (string, error) {
+	log.Info("First login. Setting up necessary tracking data.")
+	userSession := &client.UserSessionData{
+		Token: loginData.Token,
+		TokenExpirationDate: loginData.TokenExpirationDate,
+	}
+	err := p.sessionManager.SaveUserSession(*userSession)
+	if err != nil {
+		return "", err
+	}
+	organizationMemberships, err := p.trackingClient.GetOrganizationMemberships()
+	if len(organizationMemberships) == 0 {
+		return "", errors.New("no organization memberships found")
+	}
+	if len(organizationMemberships) > 1 {
+		log.Info("Multiple organizations found. This is not currently supported. Taking the first one.")
+	}
+	return organizationMemberships[0].PersonID, nil
 }

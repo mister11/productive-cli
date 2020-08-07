@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/mister11/productive-cli/internal/interfaces/cli"
+	"github.com/mister11/productive-cli/internal/cli"
 	"os"
 )
 

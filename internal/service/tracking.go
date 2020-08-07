@@ -1,12 +1,11 @@
-package application
+package service
 
 import (
 	"github.com/mister11/productive-cli/internal/domain"
-	input2 "github.com/mister11/productive-cli/internal/domain/input"
 	"github.com/mister11/productive-cli/internal/domain/tracking"
 	"github.com/mister11/productive-cli/internal/infrastructure/client"
-	"github.com/mister11/productive-cli/internal/infrastructure/input"
 	"github.com/mister11/productive-cli/internal/infrastructure/session"
+	"github.com/mister11/productive-cli/internal/interactive"
 
 	"github.com/mister11/productive-cli/internal/domain/datetime"
 )
@@ -16,12 +15,12 @@ type TrackingService struct {
 	projectEntryCreator   tracking.ProjectEntryCreator
 	trackedProjectManager domain.TrackedProjectManager
 	trackingClient        tracking.TrackingClient
-	prompt                input2.Prompt
+	prompt                interactive.Prompt
 	loginManager          domain.LoginManager
 }
 
 func NewTrackingService() *TrackingService {
-	prompt := input.NewStdinPrompt()
+	prompt := interactive.NewStdinPrompt()
 	userConfigManager := client.NewFileUserSessionManager()
 	trackedProjectManager := domain.NewFileTrackedProjectsManager()
 	dateTimeProvider := datetime.NewRealTimeDateProvider()

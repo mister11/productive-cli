@@ -199,7 +199,7 @@ func (client *HttpProductiveClient) findProjectInfo(
 		return nil, err
 	}
 	if len(deals) != 1 {
-		return nil, errors.New("Found none of multiple deals with name " + dealName)
+		return nil, errors.New("Found none or multiple deals with name " + dealName)
 	}
 	deal := deals[0].(*Deal)
 	services, err := client.SearchServices(serviceName, deal.ID, day)
@@ -207,7 +207,7 @@ func (client *HttpProductiveClient) findProjectInfo(
 		return nil, err
 	}
 	if len(services) != 1 {
-		return nil, errors.New("Found none of multiple services with name " + serviceName)
+		return nil, errors.New("Found none or multiple services with name " + serviceName)
 	}
 	service := services[0].(*Service)
 	return &Project{deal: deal, service: service}, nil

@@ -3,7 +3,7 @@ package tracking
 import (
 	"errors"
 	"github.com/mister11/productive-cli/internal/domain"
-	"github.com/mister11/productive-cli/internal/domain/input"
+	"github.com/mister11/productive-cli/internal/interactive"
 	"strings"
 	"time"
 
@@ -26,14 +26,14 @@ type ProjectEntryCreator interface {
 
 type projectEntryFactory struct {
 	dateTimeProvider     datetime.DateTimeProvider
-	prompt               input.Prompt
+	prompt               interactive.Prompt
 	projectConfigManager domain.TrackedProjectManager
 	trackingClient       TrackingClient
 }
 
 func NewProjectEntryCreator(
 	dateTimeProvider datetime.DateTimeProvider,
-	prompt input.Prompt,
+	prompt interactive.Prompt,
 	projectConfigManager domain.TrackedProjectManager,
 	trackingClient TrackingClient,
 ) ProjectEntryCreator {

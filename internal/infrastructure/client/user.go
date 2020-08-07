@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/mister11/productive-cli/internal/utils"
 	"os"
 	"path/filepath"
@@ -34,7 +35,7 @@ func (f FileUserSessionManager) GetUserSession() (*UserSessionData, error) {
 	}
 	_, err = os.Stat(*sessionPath)
 	if os.IsNotExist(err) {
-		return nil, nil
+		return nil, errors.New("missing user session data, please login first")
 	}
 	sessionJSON, err := utils.ReadFile(*sessionPath)
 	if err != nil {
