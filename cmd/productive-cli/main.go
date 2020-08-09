@@ -7,7 +7,6 @@ import (
 )
 
 func main() {
-
 	if err := cli.Run(os.Args); err != nil {
 		fmt.Fprint(os.Stderr, err)
 		os.Exit(-1)
