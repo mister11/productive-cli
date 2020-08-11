@@ -8,16 +8,16 @@ import (
 	"time"
 )
 
-type ServiceResponse struct {
+type Service struct {
 	ID   string `jsonapi:"primary,services"`
 	Name string `jsonapi:"attr,name"`
 }
 
 type serviceService struct {
-	client *client
+	client *Client
 }
 
-func newServiceService(client *client) *serviceService {
+func newServiceService(client *Client) *serviceService {
 	return &serviceService{
 		client: client,
 	}
@@ -28,13 +28,13 @@ func (service *serviceService) SearchServices(
 	dealID string,
 	startDate time.Time,
 	endDate time.Time,
-	headers map[string]string,
-) ([]ServiceResponse, error) {
+	token string,
+) ([]Service, error) {
 	startDateFormatted := formatDate(startDate)
 	endDateFormatted := formatDate(endDate)
 	uri := fmt.Sprintf(`services?filter[name]=%s&filter[after]=%s&filter[before]=%s&filter[deal_id]=%s`,
 		url.QueryEscape(query), startDateFormatted, endDateFormatted, dealID)
-	req, err := service.client.NewRequest("GET", uri, nil, headers)
+	req, err := service.client.NewRequest("GET", uri, nil, getHeaders(token))
 	if err != nil {
 		return nil, err
 	}
@@ -44,14 +44,14 @@ func (service *serviceService) SearchServices(
 	}
 	serviceResponseInterfaces, err := jsonapi.UnmarshalManyPayload(
 		servicesResponseBody,
-		reflect.TypeOf(new(ServiceResponse)),
+		reflect.TypeOf(new(Service)),
 	)
 	if err != nil {
 		return nil, err
 	}
-	var servicesResponse []ServiceResponse
+	var servicesResponse []Service
 	for _, serviceResponseInterface := range serviceResponseInterfaces {
-		servicesResponse = append(servicesResponse, serviceResponseInterface.(ServiceResponse))
+		servicesResponse = append(servicesResponse, serviceResponseInterface.(Service))
 	}
 	return servicesResponse, nil
 }

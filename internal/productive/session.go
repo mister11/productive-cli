@@ -17,10 +17,10 @@ type SessionResponse struct {
 }
 
 type sessionService struct {
-	client *client
+	client *Client
 }
 
-func newSessionService(client *client) *sessionService {
+func newSessionService(client *Client) *sessionService {
 	return &sessionService{
 		client: client,
 	}
@@ -29,7 +29,6 @@ func newSessionService(client *client) *sessionService {
 func (service *sessionService) Login(
 	username string,
 	password string,
-	headers map[string]string,
 ) (*SessionResponse, error) {
 	sessionRequest := &SessionRequest{
 		ID:       "0",
@@ -37,7 +36,7 @@ func (service *sessionService) Login(
 		Password: password,
 	}
 
-	req, err := service.client.NewRequest("POST", "sessions", sessionRequest, headers)
+	req, err := service.client.NewRequest("POST", "sessions", sessionRequest, getDefaultHeaders())
 	if err != nil {
 		return nil, err
 	}

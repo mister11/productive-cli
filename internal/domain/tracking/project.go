@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/mister11/productive-cli/internal/domain"
 	"github.com/mister11/productive-cli/internal/interactive"
+	"github.com/mister11/productive-cli/internal/service"
 	"strings"
 	"time"
 
@@ -21,7 +22,7 @@ type ProjectEntry struct {
 }
 
 type ProjectEntryCreator interface {
-	Create(request TrackProjectRequest) (*ProjectEntry, error)
+	Create(request service.TrackProjectRequest) (*ProjectEntry, error)
 }
 
 type projectEntryFactory struct {
@@ -45,7 +46,7 @@ func NewProjectEntryCreator(
 	}
 }
 
-func (factory *projectEntryFactory) Create(request TrackProjectRequest) (*ProjectEntry, error) {
+func (factory *projectEntryFactory) Create(request service.TrackProjectRequest) (*ProjectEntry, error) {
 	day := factory.dateTimeProvider.ToISOTime(request.Day)
 	existingProject := factory.selectExistingProject()
 	if existingProject != nil {

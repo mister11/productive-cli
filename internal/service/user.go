@@ -1,4 +1,4 @@
-package client
+package service
 
 import (
 	"encoding/json"
@@ -28,7 +28,7 @@ func NewFileUserSessionManager() *FileUserSessionManager {
 	return &FileUserSessionManager{}
 }
 
-func (f FileUserSessionManager) GetUserSession() (*UserSessionData, error) {
+func (f *FileUserSessionManager) GetUserSession() (*UserSessionData, error) {
 	sessionPath, err := getUserSessionPath()
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func (f FileUserSessionManager) GetUserSession() (*UserSessionData, error) {
 	return &userSession, nil
 }
 
-func (f FileUserSessionManager) SaveUserSession(session UserSessionData) error {
+func (f *FileUserSessionManager) SaveUserSession(session UserSessionData) error {
 	sessionJSON, err := json.Marshal(session)
 	if err != nil {
 		return err

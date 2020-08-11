@@ -5,25 +5,25 @@ import (
 	"reflect"
 )
 
-type OrganizationMembershipResponse struct {
+type OrganizationMembership struct {
 	PersonID string
 }
 
 type organizationMembershipService struct {
-	client *client
+	client *Client
 }
 
-func newOrganizationMembershipService(client *client) *organizationMembershipService {
+func newOrganizationMembershipService(client *Client) *organizationMembershipService {
 	return &organizationMembershipService{
 		client: client,
 	}
 }
 
 func (service *organizationMembershipService) FetchAll(
-	headers map[string]string,
-) ([]OrganizationMembershipResponse, error) {
+	token string,
+) ([]OrganizationMembership, error) {
 
-	req, err := service.client.NewRequest("GET", "organization_memberships", nil, headers)
+	req, err := service.client.NewRequest("GET", "organization_memberships", nil, getHeaders(token))
 
 	if err != nil {
 		return nil, err
@@ -36,15 +36,15 @@ func (service *organizationMembershipService) FetchAll(
 
 	organizationMembershipInterfaces, err := jsonapi.UnmarshalManyPayload(
 		organizationMembershipsBody,
-		reflect.TypeOf(new(OrganizationMembershipResponse)),
+		reflect.TypeOf(new(OrganizationMembership)),
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	var organizationMemberships []OrganizationMembershipResponse
+	var organizationMemberships []OrganizationMembership
 	for _, organizationMembershipInterface := range organizationMembershipInterfaces {
-		organizationMemberships = append(organizationMemberships, organizationMembershipInterface.(OrganizationMembershipResponse))
+		organizationMemberships = append(organizationMemberships, organizationMembershipInterface.(OrganizationMembership))
 	}
 	return organizationMemberships, nil
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/mister11/productive-cli/internal/domain/tracking"
 	"github.com/mister11/productive-cli/internal/infrastructure/json"
 	"github.com/mister11/productive-cli/internal/infrastructure/log"
+	"github.com/mister11/productive-cli/internal/service"
 	"github.com/mister11/productive-cli/internal/utils"
 	"net/url"
 	"reflect"
@@ -20,12 +21,12 @@ const baseURL = "https://api.productive.io/api/v2/"
 const orgID = "1"
 
 type HttpProductiveClient struct {
-	client                HttpClient
-	userConfigManager     UserSessionManager
+	client            HttpClient
+	userConfigManager service.UserSessionManager
 }
 
 func NewProductiveClient(
-	userConfigManager UserSessionManager,
+	userConfigManager service.UserSessionManager,
 ) *HttpProductiveClient {
 	client := &HttpProductiveClient{
 		client:                NewHttpClient(baseURL),
