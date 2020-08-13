@@ -51,7 +51,7 @@ func (service *serviceService) SearchServices(
 	}
 	var servicesResponse []Service
 	for _, serviceResponseInterface := range serviceResponseInterfaces {
-		servicesResponse = append(servicesResponse, serviceResponseInterface.(Service))
+		servicesResponse = append(servicesResponse, *serviceResponseInterface.(*Service))
 	}
 	return servicesResponse, nil
 }

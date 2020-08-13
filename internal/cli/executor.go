@@ -3,7 +3,6 @@ package cli
 import (
 	"github.com/mister11/productive-cli/internal/productive"
 	"github.com/mister11/productive-cli/internal/service"
-	"github.com/mister11/productive-cli/internal/service/tracking"
 	"github.com/urfave/cli/v2"
 )
 
@@ -14,7 +13,7 @@ func trackFood(context *cli.Context) error {
 		Day:            context.String("d"),
 	}
 	client := productive.NewClient(nil)
-	return tracking.NewFoodTrackingService(client).TrackFood(trackFoodRequest)
+	return service.NewFoodTrackingService(client).TrackFood(trackFoodRequest)
 }
 
 func trackProject(context *cli.Context) error {
@@ -22,5 +21,5 @@ func trackProject(context *cli.Context) error {
 		Day: context.String("d"),
 	}
 	client := productive.NewClient(nil)
-	return service.NewTrackingService().TrackProject(trackProjectRequest)
+	return service.NewProjectTrackingService(client).TrackProject(trackProjectRequest)
 }

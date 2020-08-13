@@ -26,13 +26,17 @@ func newDealsService(client *Client) *dealsService {
 func (service *dealsService) SearchDeals(
 	query string,
 	startDate time.Time,
-	endDate time.Time,
+	endDate *time.Time,
 	token string,
 ) ([]Deal, error) {
 	startDateFormatted := formatDate(startDate)
-	endDateFormatted := formatDate(endDate)
-	uri := fmt.Sprintf("deals?filter[query]=%s&filter[date][lt_eq]=%s&filter[end_date][gt_eq]=%s",
-		url.QueryEscape(query), startDateFormatted, endDateFormatted)
+	uri := fmt.Sprintf("deals?filter[query]=%s&filter[date][lt_eq]=%s",
+		url.QueryEscape(query), startDateFormatted)
+
+	if endDate != nil {
+		endDateFormatted := formatDate(*endDate)
+		uri += fmt.Sprintf("&filter[end_date][gt_eq]=%s", endDateFormatted)
+	}
 
 	req, err := service.client.NewRequest("GET", uri, nil, getHeaders(token))
 	if err != nil {
@@ -48,7 +52,7 @@ func (service *dealsService) SearchDeals(
 		return nil, err
 	}
 	for _, dealResponseInterface := range dealResponseInterfaces {
-		dealsResponse = append(dealsResponse, dealResponseInterface.(Deal))
+		dealsResponse = append(dealsResponse, *dealResponseInterface.(*Deal))
 	}
 	return dealsResponse, nil
 }

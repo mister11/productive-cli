@@ -1,18 +1,19 @@
-package interactive
+package service
 
 import (
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
-	"github.com/mister11/productive-cli/internal/domain"
+	"github.com/mister11/productive-cli/internal/productive"
 )
 
 type Prompt interface {
 	Input(label string) (string, error)
 	InputMasked(label string) (string, error)
 	InputMultiline(label string) ([]string, error)
-	SelectOne(label string, options []interface{}) (interface{}, error)
-	SelectOneWithSearch(label string, options []domain.TrackedProject, searchFunction func(string, int) bool) interface{}
+	SelectDeal(label string, deals []productive.Deal) (*productive.Deal, error)
+	SelectService(label string, services []productive.Service) (*productive.Service, error)
+	SelectOneWithSearch(label string, options []TrackedProject, searchFunction func(string, int) bool) interface{}
 }
 
 type StdinPrompt struct{}
@@ -66,10 +67,10 @@ func (stdIn StdinPrompt) InputMultiline(label string) ([]string, error) {
 	return inputs, nil
 }
 
-func (stdIn StdinPrompt) SelectOne(label string, options []interface{}) (interface{}, error) {
+func (stdIn StdinPrompt) SelectDeal(label string, deals []productive.Deal) (*productive.Deal, error) {
 	prompt := promptui.Select{
 		Label: label,
-		Items: options,
+		Items: deals,
 		Templates: &promptui.SelectTemplates{
 			Active:   "\U0001F872 {{ .Name | cyan }}",
 			Inactive: "{{ .Name }}",
@@ -83,12 +84,32 @@ func (stdIn StdinPrompt) SelectOne(label string, options []interface{}) (interfa
 		return nil, err
 	}
 
-	return options[index], nil
+	return &deals[index], nil
+}
+
+func (stdIn StdinPrompt) SelectService(label string, services []productive.Service) (*productive.Service, error) {
+	prompt := promptui.Select{
+		Label: label,
+		Items: services,
+		Templates: &promptui.SelectTemplates{
+			Active:   "\U0001F872 {{ .Name | cyan }}",
+			Inactive: "{{ .Name }}",
+			Selected: "\U0001F872 {{ .Name | cyan }}",
+		},
+	}
+
+	index, _, err := prompt.Run()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &services[index], nil
 }
 
 func (stdIn StdinPrompt) SelectOneWithSearch(
 	label string,
-	options []domain.TrackedProject,
+	options []TrackedProject,
 	searchFunction func(string, int) bool,
 ) interface{} {
 	prompt := promptui.Select{

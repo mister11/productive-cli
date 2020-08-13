@@ -1,11 +1,9 @@
-package tracking
+package service
 
 import (
 	"errors"
-	"github.com/mister11/productive-cli/internal/domain/datetime"
-	"github.com/mister11/productive-cli/internal/interactive"
 	"github.com/mister11/productive-cli/internal/productive"
-	"github.com/mister11/productive-cli/internal/service"
+	"github.com/mister11/productive-cli/internal/service/datetime"
 	"time"
 )
 
@@ -14,27 +12,27 @@ type FoodEntry struct {
 }
 
 type FoodTrackingService struct {
-	productiveService *service.ProductiveService
-	prompt            interactive.Prompt
-	sessionService    *service.SessionService
+	productiveService *ProductiveService
+	prompt            Prompt
+	sessionService    *SessionService
 	dateTimeProvider  datetime.DateTimeProvider
 }
 
 func NewFoodTrackingService(productiveClient *productive.Client) *FoodTrackingService {
-	sessionManager := service.NewFileUserSessionManager()
-	sessionService := service.NewSessionService(productiveClient, sessionManager)
-	stdInPrompt := interactive.NewStdinPrompt()
+	sessionManager := NewFileUserSessionManager()
+	sessionService := NewSessionService(productiveClient, sessionManager)
+	stdInPrompt := NewStdinPrompt()
 	dateTimeProvider := datetime.NewRealTimeDateProvider()
 
 	return &FoodTrackingService{
-		productiveService: service.NewProductiveService(productiveClient),
+		productiveService: NewProductiveService(productiveClient),
 		prompt:            stdInPrompt,
 		sessionService:    sessionService,
 		dateTimeProvider:  dateTimeProvider,
 	}
 }
 
-func (service *FoodTrackingService) TrackFood(request service.TrackFoodRequest) error {
+func (service *FoodTrackingService) TrackFood(request TrackFoodRequest) error {
 	if err := service.loginIfNeeded(); err != nil {
 		return err
 	}
@@ -48,14 +46,14 @@ func (service *FoodTrackingService) TrackFood(request service.TrackFoodRequest) 
 		entries = append(entries, entry)
 	}
 	for _, entry := range entries {
-		if err := service.productiveService.CreateTimeEntry(entry); err != nil {
+		if err := service.productiveService.CreateFoodTimeEntry(entry); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (service *FoodTrackingService) getTrackingDays(request service.TrackFoodRequest) []time.Time {
+func (service *FoodTrackingService) getTrackingDays(request TrackFoodRequest) []time.Time {
 	if request.IsWeekTracking {
 		return service.dateTimeProvider.GetWeekDays()
 	} else if request.Day != "" {
@@ -74,7 +72,7 @@ func (service *FoodTrackingService) loginIfNeeded() error {
 	if isSessionValid {
 		return nil
 	}
-	username, err := service.prompt.Input("Username")
+	username, err := service.prompt.Input("E-mail")
 	if err != nil {
 		return err
 	}

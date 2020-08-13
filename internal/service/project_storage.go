@@ -1,4 +1,4 @@
-package domain
+package service
 
 import (
 	"encoding/json"
@@ -21,18 +21,18 @@ type TrackedProject struct {
 	ServiceName string
 }
 
-type TrackedProjectManager interface {
+type ProjectStorage interface {
 	UpsertTrackedProject(project TrackedProject) error
 	GetTrackedProjects() ([]TrackedProject, error)
 }
 
-type FileTrackedProjectsManager struct{}
+type FileProjectStorage struct{}
 
-func NewFileTrackedProjectsManager() *FileTrackedProjectsManager {
-	return &FileTrackedProjectsManager{}
+func NewFileProjectStorage() *FileProjectStorage {
+	return &FileProjectStorage{}
 }
 
-func (f FileTrackedProjectsManager) UpsertTrackedProject(project TrackedProject) error {
+func (f FileProjectStorage) UpsertTrackedProject(project TrackedProject) error {
 	projects, err := f.GetTrackedProjects()
 	if err != nil {
 		return err
@@ -54,7 +54,7 @@ func (f FileTrackedProjectsManager) UpsertTrackedProject(project TrackedProject)
 	return utils.WriteFile(*projectsConfigPath, projectsConfigJSON)
 }
 
-func (f FileTrackedProjectsManager) GetTrackedProjects() ([]TrackedProject, error) {
+func (f FileProjectStorage) GetTrackedProjects() ([]TrackedProject, error) {
 	configPath, err := getProjectConfigPath()
 	if err != nil {
 		return nil, err

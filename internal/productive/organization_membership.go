@@ -6,7 +6,8 @@ import (
 )
 
 type OrganizationMembership struct {
-	PersonID string
+	ID   string  `jsonapi:"primary,organization_memberships"`
+	User *Person `jsonapi:"relation,person"`
 }
 
 type organizationMembershipService struct {
@@ -44,7 +45,8 @@ func (service *organizationMembershipService) FetchAll(
 
 	var organizationMemberships []OrganizationMembership
 	for _, organizationMembershipInterface := range organizationMembershipInterfaces {
-		organizationMemberships = append(organizationMemberships, organizationMembershipInterface.(OrganizationMembership))
+		orgMembership := organizationMembershipInterface.(*OrganizationMembership)
+		organizationMemberships = append(organizationMemberships, *orgMembership)
 	}
 	return organizationMemberships, nil
 }

@@ -2,7 +2,7 @@ package service
 
 import (
 	"errors"
-	"github.com/mister11/productive-cli/internal/infrastructure/log"
+	"github.com/mister11/productive-cli/internal/log"
 	"github.com/mister11/productive-cli/internal/productive"
 	"time"
 )
@@ -98,5 +98,5 @@ func (service *SessionService) handleFirstLogin(response productive.SessionRespo
 	if len(organizationMemberships) > 1 {
 		log.Info("Multiple organizations found. This is not currently supported. Taking the first one.")
 	}
-	return organizationMemberships[0].PersonID, nil
+	return organizationMemberships[0].User.ID, nil
 }

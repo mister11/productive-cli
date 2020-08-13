@@ -2,13 +2,10 @@ package service
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/mister11/productive-cli/internal/utils"
 	"os"
-	"path/filepath"
 )
 
-const dataFolder = ".productive"
 const userSessionFile = "user"
 
 type UserSessionData struct {
@@ -35,7 +32,7 @@ func (f *FileUserSessionManager) GetUserSession() (*UserSessionData, error) {
 	}
 	_, err = os.Stat(*sessionPath)
 	if os.IsNotExist(err) {
-		return nil, errors.New("missing user session data, please login first")
+		return nil, nil
 	}
 	sessionJSON, err := utils.ReadFile(*sessionPath)
 	if err != nil {
@@ -68,8 +65,4 @@ func getUserSessionPath() (*string, error) {
 	}
 	sessionPath := homeDir + getSeparator() + dataFolder + getSeparator() + userSessionFile
 	return &sessionPath, nil
-}
-
-func getSeparator() string {
-	return string(filepath.Separator)
 }
