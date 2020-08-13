@@ -13,11 +13,6 @@ type ProductiveService struct {
 	userSessionManager UserSessionManager
 }
 
-type Project struct {
-	deal    productive.Deal
-	service productive.Service
-}
-
 func NewProductiveService(client *productive.Client) *ProductiveService {
 	userSessionManager := NewFileUserSessionManager()
 	return &ProductiveService{

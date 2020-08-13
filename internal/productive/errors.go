@@ -2,4 +2,4 @@ package productive
 
 import "errors"
 
-var Unauthorized = errors.New("unauthorized access")
+var ErrUnauthorized = errors.New("unauthorized access")

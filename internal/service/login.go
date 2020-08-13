@@ -92,6 +92,9 @@ func (service *SessionService) handleFirstLogin(response productive.SessionRespo
 		return "", err
 	}
 	organizationMemberships, err := service.client.OrganizationMembershipService.FetchAll(response.Token)
+	if err != nil {
+		return "", err
+	}
 	if len(organizationMemberships) == 0 {
 		return "", errors.New("no organization memberships found")
 	}

@@ -103,6 +103,9 @@ func (s *ProjectTrackingService) trackNewProject(day time.Time) error {
 		return err
 	}
 	selectedService, err := s.prompt.SelectService("Select service", services)
+	if err != nil {
+		return err
+	}
 	projectEntry, err := s.createProjectEntry(selectedService, day)
 	if err != nil {
 		return err

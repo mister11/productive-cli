@@ -14,7 +14,7 @@ var TimeRegex = regexp.MustCompile(`^(?:(\d+)[:])?(\d+)$`)
 func ParseTime(time string) (string, error) {
 	matches := TimeRegex.FindStringSubmatch(time)
 	if len(matches) != 3 {
-		return "", errors.New("Wrong time format. You can enter either only minutes or HH:mm format")
+		return "", errors.New("wrong time format - only minutes or HH:mm format allowed")
 	}
 	hoursString := matches[1]
 	minutesString := matches[2]

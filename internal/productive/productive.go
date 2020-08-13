@@ -81,12 +81,15 @@ func (client *Client) Do(request *http.Request) (io.Reader, error) {
 	}
 
 	if resp.StatusCode == 401 {
-		return nil, Unauthorized
+		return nil, ErrUnauthorized
 	}
 
 	defer resp.Body.Close()
 
 	responseBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 	return bytes.NewReader(responseBody), nil
 }
 
