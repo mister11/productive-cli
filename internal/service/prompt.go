@@ -13,7 +13,7 @@ type Prompt interface {
 	InputMultiline(label string) ([]string, error)
 	SelectDeal(label string, deals []productive.Deal) (*productive.Deal, error)
 	SelectService(label string, services []productive.Service) (*productive.Service, error)
-	SelectOneWithSearch(label string, options []TrackedProject, searchFunction func(string, int) bool) interface{}
+	SelectOneWithSearch(label string, options []TrackedProject, searchFunction func(string, int) bool) (interface{}, error)
 }
 
 type StdinPrompt struct{}
@@ -111,7 +111,7 @@ func (stdIn StdinPrompt) SelectOneWithSearch(
 	label string,
 	options []TrackedProject,
 	searchFunction func(string, int) bool,
-) interface{} {
+) (interface{}, error) {
 	prompt := promptui.Select{
 		Label: label,
 		Items: options,
@@ -126,8 +126,8 @@ func (stdIn StdinPrompt) SelectOneWithSearch(
 	index, _, err := prompt.Run()
 
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return options[index]
+	return options[index], nil
 }

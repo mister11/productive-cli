@@ -61,6 +61,7 @@ func (s *ProjectTrackingService) TrackProject(request TrackProjectRequest) error
 	}
 }
 
+// we ignore any error here which will then cause fallback to new project search
 func (s *ProjectTrackingService) selectExistingProject() *TrackedProject {
 	savedProjects, err := s.projectStorage.GetTrackedProjects()
 	if err != nil {
@@ -69,11 +70,14 @@ func (s *ProjectTrackingService) selectExistingProject() *TrackedProject {
 	if len(savedProjects) == 0 {
 		return nil
 	}
-	selectedProject := s.prompt.SelectOneWithSearch(
+	selectedProject, err := s.prompt.SelectOneWithSearch(
 		"Select project",
 		savedProjects,
 		searchProjectFunction(savedProjects),
 	)
+	if err != nil {
+		return nil
+	}
 	return selectedProject.(*TrackedProject)
 }
 
@@ -103,7 +107,15 @@ func (s *ProjectTrackingService) trackNewProject(day time.Time) error {
 	if err != nil {
 		return err
 	}
-	return s.productiveService.CreateProjectTimeEntry(*projectEntry)
+	if err := s.productiveService.CreateProjectTimeEntry(*projectEntry); err != nil {
+		return err
+	}
+	return s.projectStorage.UpsertTrackedProject(TrackedProject{
+		DealID:      selectedDeal.ID,
+		DealName:    selectedDeal.Name,
+		ServiceID:   selectedService.ID,
+		ServiceName: selectedService.Name,
+	})
 }
 
 func (s *ProjectTrackingService) trackExistingProject(project *TrackedProject, day time.Time) error {
