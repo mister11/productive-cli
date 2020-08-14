@@ -5,6 +5,6 @@ import (
 )
 
 func ReportError(message string, err error) {
-	log.Error(message)
+	log.Error(message, err)
 	panic(err)
 }

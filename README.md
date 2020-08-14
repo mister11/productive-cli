@@ -14,9 +14,10 @@ Download ZIP file from [releases page](https://github.com/mister11/productive-cl
 
 You can look up usage by providing a `-h` flag to any CLI command (e.g. `productive-cli -h`).
 
-### Initialization
+### Login
 
-Before the first use, you have to run `productive-cli init` so that CLI can setup your user information. Command will ask you to provide your personal access token for Productive which can be obtained in Settings -> Security.
+An explicit login is not necessary. Each action will check local token (stored in `~/.productive/user` file) and decide
+if token is valid or user needs to go through login process.
 
 ### Tracking
 

@@ -1,4 +1,4 @@
-package action
+package service
 
 type TrackFoodRequest struct {
 	IsWeekTracking bool

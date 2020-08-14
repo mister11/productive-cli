@@ -1,17 +1,14 @@
 package main
 
 import (
+	"fmt"
+	"github.com/mister11/productive-cli/internal/cli"
 	"os"
-
-	"github.com/mister11/productive-cli/internal/app"
 )
 
 func main() {
-
-	cliApp := app.CreateProductiveCliApp()
-
-	err := cliApp.Run(os.Args)
-	if err != nil {
-		panic(err)
+	if err := cli.Run(os.Args); err != nil {
+		fmt.Fprint(os.Stderr, err)
+		os.Exit(-1)
 	}
 }

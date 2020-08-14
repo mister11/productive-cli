@@ -1,17 +1,18 @@
 package log
 
 import (
-	"github.com/fatih/color"
+	"fmt"
+	"github.com/logrusorgru/aurora"
 )
 
-func Debug(message interface{}) {
-	color.White("%s", message)
+func Debug(format string, args ...interface{}) {
+	fmt.Println(aurora.White(fmt.Sprintf(format, args)))
 }
 
 func Info(format string, args ...interface{}) {
-	color.Magenta(format, args)
+	fmt.Println(aurora.Cyan(fmt.Sprintf(format, args)))
 }
 
-func Error(message string) {
-	color.Red(message)
+func Error(format string, err ...error) {
+	_ = fmt.Errorf(format, err)
 }
