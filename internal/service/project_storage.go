@@ -51,6 +51,9 @@ func (f FileProjectStorage) UpsertTrackedProject(project TrackedProject) error {
 	if err != nil {
 		return err
 	}
+	if err := ensureConfigFolderExists(); err != nil {
+		return err
+	}
 	return utils.WriteFile(*projectsConfigPath, projectsConfigJSON)
 }
 

@@ -55,6 +55,9 @@ func (f *FileUserSessionManager) SaveUserSession(session UserSessionData) error 
 	if err != nil {
 		return err
 	}
+	if err := ensureConfigFolderExists(); err != nil {
+		return err
+	}
 	return utils.WriteFile(*sessionPath, sessionJSON)
 }
 
@@ -65,4 +68,17 @@ func getUserSessionPath() (*string, error) {
 	}
 	sessionPath := homeDir + getSeparator() + dataFolder + getSeparator() + userSessionFile
 	return &sessionPath, nil
+}
+
+func ensureConfigFolderExists() error {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	configPath := homeDir + getSeparator() + dataFolder
+	_, err = os.Stat(configPath)
+	if os.IsNotExist(err) {
+		return os.MkdirAll(configPath, 0744)
+	}
+	return nil
 }
