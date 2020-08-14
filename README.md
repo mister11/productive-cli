@@ -40,4 +40,4 @@ Alongside generic `-d` flag, you have `-w` flag to track food for the whole week
 
 When command is ran, you'll first see all the projects you've already tracked in the past. If you want to track a new project, press `Ctrl+C`. 
 
-At the moment, there's no nice way to delete already tracked projects. You can edit `~/.productive/config` file where they are saved.
+At the moment, there's no nice way to delete already tracked projects. You can edit `~/.productive/projects` file where they are saved.
