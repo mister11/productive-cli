@@ -8,6 +8,5 @@ require (
 	github.com/jinzhu/now v1.1.1
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/manifoldco/promptui v0.7.0
-	github.com/stretchr/testify v1.5.1
 	github.com/urfave/cli/v2 v2.1.1
 )
