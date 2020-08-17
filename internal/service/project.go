@@ -1,12 +1,13 @@
 package service
 
 import (
+	"strings"
+	"time"
+
 	"github.com/mister11/productive-cli/internal/log"
 	"github.com/mister11/productive-cli/internal/productive"
 	"github.com/mister11/productive-cli/internal/service/datetime"
 	"github.com/mister11/productive-cli/internal/utils"
-	"strings"
-	"time"
 )
 
 type ProjectEntry struct {
@@ -26,12 +27,13 @@ type ProjectTrackingService struct {
 
 func NewProjectTrackingService(client *productive.Client) *ProjectTrackingService {
 	sessionManager := NewFileUserSessionManager()
-	sessionService := NewSessionService(client, sessionManager)
 	stdInPrompt := NewStdinPrompt()
+	productiveService := NewProductiveService(client)
+	sessionService := NewSessionService(productiveService, stdInPrompt, sessionManager)
 	dateTimeProvider := datetime.NewRealTimeDateProvider()
 
 	return &ProjectTrackingService{
-		productiveService: NewProductiveService(client),
+		productiveService: productiveService,
 		prompt:            stdInPrompt,
 		sessionService:    sessionService,
 		projectStorage:    NewFileProjectStorage(),
@@ -40,7 +42,8 @@ func NewProjectTrackingService(client *productive.Client) *ProjectTrackingServic
 }
 
 func (s *ProjectTrackingService) TrackProject(request TrackProjectRequest) error {
-	if err := s.loginIfNeeded(); err != nil {
+	userSession, err := s.sessionService.ObtainUserSession()
+	if err != nil {
 		return err
 	}
 	var day time.Time
@@ -51,13 +54,13 @@ func (s *ProjectTrackingService) TrackProject(request TrackProjectRequest) error
 	}
 	existingProject := s.selectExistingProject()
 	if existingProject != nil {
-		trackedProject := s.productiveService.FindSavedProject(existingProject, day)
+		trackedProject := s.productiveService.FindSavedProject(existingProject, day, userSession)
 		if trackedProject == nil {
-			return s.trackNewProject(day)
+			return s.trackNewProject(day, userSession)
 		}
-		return s.trackExistingProject(trackedProject, day)
+		return s.trackExistingProject(trackedProject, day, userSession)
 	} else {
-		return s.trackNewProject(day)
+		return s.trackNewProject(day, userSession)
 	}
 }
 
@@ -81,12 +84,12 @@ func (s *ProjectTrackingService) selectExistingProject() *TrackedProject {
 	return selectedProject.(*TrackedProject)
 }
 
-func (s *ProjectTrackingService) trackNewProject(day time.Time) error {
+func (s *ProjectTrackingService) trackNewProject(day time.Time, userSession *UserSessionData) error {
 	dealQuery, err := s.prompt.Input("Enter project name")
 	if err != nil {
 		return err
 	}
-	deals, err := s.productiveService.FindDeals(dealQuery, day)
+	deals, err := s.productiveService.FindDeals(dealQuery, day, userSession)
 	if err != nil {
 		return err
 	}
@@ -98,7 +101,7 @@ func (s *ProjectTrackingService) trackNewProject(day time.Time) error {
 	if err != nil {
 		return err
 	}
-	services, err := s.productiveService.FindServices(serviceQuery, selectedDeal, day)
+	services, err := s.productiveService.FindServices(serviceQuery, selectedDeal, day, userSession)
 	if err != nil {
 		return err
 	}
@@ -110,7 +113,7 @@ func (s *ProjectTrackingService) trackNewProject(day time.Time) error {
 	if err != nil {
 		return err
 	}
-	if err := s.productiveService.CreateProjectTimeEntry(*projectEntry); err != nil {
+	if err := s.productiveService.CreateProjectTimeEntry(*projectEntry, userSession); err != nil {
 		return err
 	}
 	return s.projectStorage.UpsertTrackedProject(TrackedProject{
@@ -121,7 +124,7 @@ func (s *ProjectTrackingService) trackNewProject(day time.Time) error {
 	})
 }
 
-func (s *ProjectTrackingService) trackExistingProject(project *TrackedProject, day time.Time) error {
+func (s *ProjectTrackingService) trackExistingProject(project *TrackedProject, day time.Time, userSession *UserSessionData) error {
 	service := &productive.Service{
 		ID:   project.ServiceID,
 		Name: project.ServiceName,
@@ -130,7 +133,7 @@ func (s *ProjectTrackingService) trackExistingProject(project *TrackedProject, d
 	if err != nil {
 		return err
 	}
-	return s.productiveService.CreateProjectTimeEntry(*projectEntry)
+	return s.productiveService.CreateProjectTimeEntry(*projectEntry, userSession)
 }
 
 func (s *ProjectTrackingService) createProjectEntry(
@@ -164,26 +167,6 @@ func (s *ProjectTrackingService) createProjectEntry(
 		Notes:    notes,
 	}
 	return projectEntry, nil
-}
-
-func (s *ProjectTrackingService) loginIfNeeded() error {
-	isSessionValid, err := s.sessionService.IsSessionValid()
-	if err != nil {
-		return err
-	}
-	// session is valid, we don't need login and there's no error
-	if isSessionValid {
-		return nil
-	}
-	username, err := s.prompt.Input("E-mail")
-	if err != nil {
-		return err
-	}
-	password, err := s.prompt.InputMasked("Password")
-	if err != nil {
-		return err
-	}
-	return s.sessionService.Login(username, password)
 }
 
 func searchProjectFunction(projects []TrackedProject) func(string, int) bool {

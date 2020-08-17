@@ -2,31 +2,25 @@ package service
 
 import (
 	"errors"
-	"github.com/mister11/productive-cli/internal/log"
-	"github.com/mister11/productive-cli/internal/productive"
 	"strings"
 	"time"
+
+	"github.com/mister11/productive-cli/internal/log"
+	"github.com/mister11/productive-cli/internal/productive"
 )
 
 type ProductiveService struct {
-	client             *productive.Client
-	userSessionManager UserSessionManager
+	client *productive.Client
 }
 
 func NewProductiveService(client *productive.Client) *ProductiveService {
-	userSessionManager := NewFileUserSessionManager()
 	return &ProductiveService{
-		client:             client,
-		userSessionManager: userSessionManager,
+		client: client,
 	}
 }
 
-func (s *ProductiveService) CreateFoodTimeEntry(entry FoodEntry) error {
-	sessionData, err := s.userSessionManager.GetUserSession()
-	if err != nil {
-		return err
-	}
-	foodService, err := s.FindFoodService(entry.Day)
+func (s *ProductiveService) CreateFoodTimeEntry(entry FoodEntry, sessionData *UserSessionData) error {
+	foodService, err := s.FindFoodService(entry.Day, sessionData)
 	if err != nil {
 		return err
 	}
@@ -36,11 +30,7 @@ func (s *ProductiveService) CreateFoodTimeEntry(entry FoodEntry) error {
 	)
 }
 
-func (s *ProductiveService) CreateProjectTimeEntry(entry ProjectEntry) error {
-	sessionData, err := s.userSessionManager.GetUserSession()
-	if err != nil {
-		return err
-	}
+func (s *ProductiveService) CreateProjectTimeEntry(entry ProjectEntry, sessionData *UserSessionData) error {
 	log.Debug("Creating project time entry for day %v", entry.Day)
 	return s.client.TimeEntryService.CreateTimeEntry(
 		formatNotes(entry.Notes), entry.Duration,
@@ -48,11 +38,7 @@ func (s *ProductiveService) CreateProjectTimeEntry(entry ProjectEntry) error {
 	)
 }
 
-func (s *ProductiveService) FindFoodService(day time.Time) (*productive.Service, error) {
-	sessionData, err := s.userSessionManager.GetUserSession()
-	if err != nil {
-		return nil, err
-	}
+func (s *ProductiveService) FindFoodService(day time.Time, sessionData *UserSessionData) (*productive.Service, error) {
 	deals, err := s.client.DealService.SearchDeals("Operations general", day, &day, sessionData.Token)
 	if err != nil {
 		return nil, err
@@ -77,11 +63,7 @@ func (s *ProductiveService) FindFoodService(day time.Time) (*productive.Service,
 	return &services[0], nil
 }
 
-func (s *ProductiveService) FindSavedProject(project *TrackedProject, day time.Time) *TrackedProject {
-	sessionData, err := s.userSessionManager.GetUserSession()
-	if err != nil {
-		return nil
-	}
+func (s *ProductiveService) FindSavedProject(project *TrackedProject, day time.Time, sessionData *UserSessionData) *TrackedProject {
 	services, err := s.client.ServiceService.SearchServices(project.ServiceName, project.DealID, day, day, sessionData.Token)
 	if err != nil {
 		return nil
@@ -96,11 +78,7 @@ func (s *ProductiveService) FindSavedProject(project *TrackedProject, day time.T
 	return nil
 }
 
-func (s *ProductiveService) FindDeals(dealQuery string, day time.Time) ([]productive.Deal, error) {
-	sessionData, err := s.userSessionManager.GetUserSession()
-	if err != nil {
-		return nil, err
-	}
+func (s *ProductiveService) FindDeals(dealQuery string, day time.Time, sessionData *UserSessionData) ([]productive.Deal, error) {
 	deals, err := s.client.DealService.SearchDeals(dealQuery, day, &day, sessionData.Token)
 	// end_date in Productive can be null so we cover this here
 	// it can be some other error, but we assume that one for simplicity
@@ -113,12 +91,16 @@ func (s *ProductiveService) FindDeals(dealQuery string, day time.Time) ([]produc
 	return deals, err
 }
 
-func (s *ProductiveService) FindServices(serviceQuery string, deal *productive.Deal, day time.Time) ([]productive.Service, error) {
-	sessionData, err := s.userSessionManager.GetUserSession()
-	if err != nil {
-		return nil, err
-	}
+func (s *ProductiveService) FindServices(serviceQuery string, deal *productive.Deal, day time.Time, sessionData *UserSessionData) ([]productive.Service, error) {
 	return s.client.ServiceService.SearchServices(serviceQuery, deal.ID, day, day, sessionData.Token)
+}
+
+func (s *ProductiveService) Login(username string, password string) (*productive.SessionResponse, error) {
+	return s.client.SessionService.Login(username, password)
+}
+
+func (s *ProductiveService) GetOrganizationMemberships(sessionData *UserSessionData) ([]productive.OrganizationMembership, error) {
+	return s.client.OrganizationMembershipService.FetchAll(sessionData.Token)
 }
 
 func formatNotes(notes []string) string {
