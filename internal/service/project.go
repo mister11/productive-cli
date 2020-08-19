@@ -58,7 +58,7 @@ func (s *ProjectTrackingService) TrackProject(request TrackProjectRequest) error
 		if trackedProject == nil {
 			return s.trackNewProject(day, userSession)
 		}
-		return s.trackExistingProject(trackedProject, day, userSession)
+		return s.trackExistingProject(*trackedProject, day, userSession)
 	} else {
 		return s.trackNewProject(day, userSession)
 	}
@@ -81,7 +81,8 @@ func (s *ProjectTrackingService) selectExistingProject() *TrackedProject {
 	if err != nil {
 		return nil
 	}
-	return selectedProject.(*TrackedProject)
+	trackedProject := selectedProject.(TrackedProject)
+	return &trackedProject
 }
 
 func (s *ProjectTrackingService) trackNewProject(day time.Time, userSession *UserSessionData) error {
@@ -124,7 +125,7 @@ func (s *ProjectTrackingService) trackNewProject(day time.Time, userSession *Use
 	})
 }
 
-func (s *ProjectTrackingService) trackExistingProject(project *TrackedProject, day time.Time, userSession *UserSessionData) error {
+func (s *ProjectTrackingService) trackExistingProject(project TrackedProject, day time.Time, userSession *UserSessionData) error {
 	service := &productive.Service{
 		ID:   project.ServiceID,
 		Name: project.ServiceName,

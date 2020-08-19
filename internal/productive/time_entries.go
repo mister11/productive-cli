@@ -9,7 +9,7 @@ type TimeEntryRequest struct {
 	Date   string   `jsonapi:"attr,date"`
 	Note   string   `jsonapi:"attr,note"`
 	Time   string   `jsonapi:"attr,time"`
-	User   *Person  `jsonapi:"relation,person"`
+	Person *Person  `jsonapi:"relation,person"`
 	Budget *Service `jsonapi:"relation,service"`
 }
 
@@ -40,7 +40,7 @@ func (s *timeEntryService) CreateTimeEntry(
 		Date:   formatDate(day),
 		Note:   notes,
 		Time:   time,
-		User:   &Person{ID: userID},
+		Person: &Person{ID: userID},
 		Budget: service,
 	}
 	req, err := s.client.NewRequest("POST", "time_entries", timeEntry, getHeaders(token))

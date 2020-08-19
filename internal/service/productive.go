@@ -99,6 +99,10 @@ func (s *ProductiveService) Login(username string, password string) (*productive
 	return s.client.SessionService.Login(username, password)
 }
 
+func (s *ProductiveService) ValidateSession(otp string, password string, sessionResponse *productive.SessionResponse) (*productive.SessionResponse, error) {
+	return s.client.SessionService.ValidateSession(otp, password, sessionResponse)
+}
+
 func (s *ProductiveService) GetOrganizationMemberships(sessionData *UserSessionData) ([]productive.OrganizationMembership, error) {
 	return s.client.OrganizationMembershipService.FetchAll(sessionData.Token)
 }

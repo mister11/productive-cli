@@ -68,6 +68,19 @@ func (s *SessionService) login(username string, password string) (*UserSessionDa
 	if err != nil {
 		return nil, err
 	}
+	if sessionResponse.User.Is2FaEnabled {
+		otp, err := s.prompt.Input("Enter OTP from authentication application")
+		if err != nil {
+			return nil, err
+		}
+		sessionResponse, err = s.productiveService.ValidateSession(otp, password, sessionResponse)
+		if err != nil {
+			return nil, err
+		}
+		if !sessionResponse.Is2FaAuthed {
+			return nil, errors.New("error with 2FA code")
+		}
+	}
 	currentUserSession, err := s.sessionManager.GetUserSession()
 	if err != nil {
 		return nil, err
