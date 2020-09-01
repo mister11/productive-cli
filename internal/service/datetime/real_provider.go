@@ -21,7 +21,7 @@ func (dateTimeProvider *RealDateTimeProvider) GetWeekDays() []time.Time {
 
 	start := weekStart()
 	end := weekEnd()
-	for day := start; day.Day() <= end.Day(); day = day.AddDate(0, 0, 1) {
+	for day := start; day.Before(end) || day.Equal(end); day = day.AddDate(0, 0, 1) {
 		days = append(days, day)
 	}
 	return days
